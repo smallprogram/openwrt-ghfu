@@ -158,8 +158,7 @@ local function release_from_obj(obj)
         tag_name = obj.tag_name or "",
         release_name = obj.name or obj.tag_name or "",
         published_at = obj.published_at or "",
-        body = obj.body or "",
-        body_html = obj.body_html or "",
+        html_url = obj.html_url or "",
         assets = parse_assets(obj.assets)
     }
 end
