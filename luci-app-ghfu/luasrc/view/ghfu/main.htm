@@ -1,0 +1,1235 @@
+<%+header%>
+
+<style>
+    #ghfu-root {
+        max-width: none;
+        margin: 0;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid #d9e3f0;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        padding: 14px 16px 12px;
+    }
+
+    #ghfu-root h2 {
+        margin: 0 0 8px;
+        color: #0f172a;
+        letter-spacing: 0;
+    }
+
+    #ghfu-root .ghfu-subtitle {
+        color: #475569;
+        margin: 0 0 14px;
+        font-size: 12px;
+    }
+
+    #ghfu-root .cbi-value-title {
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    #ghfu-root .ghfu-wide {
+        width: 800px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    #ghfu_status {
+        width: 1000px;
+        max-width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        background: #eff6ff;
+        padding: 10px 12px;
+        color: #1e3a8a;
+        line-height: 1.5;
+    }
+
+    #ghfu_assets {
+        width: 1000px;
+        max-width: 100%;
+        max-height: 280px;
+        overflow: auto;
+        border: 1px solid #d2ddeb;
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #fcfdff;
+    }
+
+    #ghfu_assets .ghfu-asset-row {
+        padding: 6px 4px;
+        border-bottom: 1px dashed #dbe6f3;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #ghfu_assets .ghfu-asset-row:last-child {
+        border-bottom: 0;
+    }
+
+    #ghfu_log {
+        width: 1000px;
+        max-width: 100%;
+        min-height: 610px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #0f172a;
+        color: #dbeafe;
+        font-family: "Cascadia Mono", "JetBrains Mono", "Consolas", monospace;
+        line-height: 1.45;
+    }
+
+    .ghfu-status-line { margin: 2px 0; }
+    .ghfu-conclusion-ok { color: #15803d; font-weight: 700; }
+    .ghfu-conclusion-new { color: #b91c1c; font-weight: 700; }
+    .ghfu-conclusion-warn { color: #b45309; font-weight: 700; }
+
+    #ghfu-root .cbi-page-actions {
+        margin-top: 14px;
+        text-align: right;
+    }
+
+    #ghfu-root .cbi-button {
+        border-radius: 10px;
+        padding: 8px 14px;
+    }
+
+    @media (max-width: 760px) {
+        #ghfu-root {
+            padding: 12px;
+        }
+    }
+
+    #ghfu-upgrade-modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.75);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ghfu-modal-box {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 36px 48px;
+        text-align: center;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+        max-width: 420px;
+        width: 90%;
+    }
+
+    .ghfu-modal-spinner {
+        width: 48px; height: 48px;
+        border: 5px solid #e2e8f0;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: ghfu-spin 0.8s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes ghfu-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .ghfu-modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 10px;
+    }
+
+    .ghfu-modal-msg {
+        font-size: 13px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    #ghfu-notes-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.75);
+        z-index: 2147483647 !important;
+    }
+
+    .ghfu-notes-box {
+        position: absolute;
+        top: 200px;
+        right: 200px;
+        bottom: 200px;
+        left: 350px;
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #dbe6f3;
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .ghfu-notes-header {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fafc;
+    }
+
+    .ghfu-notes-title {
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .ghfu-notes-close {
+        border-radius: 8px;
+        padding: 6px 12px;
+    }
+
+    .ghfu-notes-body {
+        padding: 16px;
+        overflow: auto;
+        color: #1e293b;
+        line-height: 1.65;
+        word-break: break-word;
+        font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+        flex: 1;
+        background: #ffffff;
+    }
+
+    .ghfu-notes-body h1,
+    .ghfu-notes-body h2,
+    .ghfu-notes-body h3,
+    .ghfu-notes-body h4,
+    .ghfu-notes-body h5,
+    .ghfu-notes-body h6 {
+        margin: 0.8em 0 0.4em;
+        color: #0f172a;
+        line-height: 1.35;
+    }
+
+    .ghfu-notes-body p {
+        margin: 0.5em 0;
+    }
+
+    .ghfu-notes-body ul,
+    .ghfu-notes-body ol {
+        margin: 0.5em 0 0.8em 1.4em;
+    }
+
+    .ghfu-notes-body pre {
+        margin: 0.8em 0;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #0f172a;
+        color: #dbeafe;
+        overflow: auto;
+    }
+
+    .ghfu-notes-body code {
+        font-family: "Cascadia Mono", "JetBrains Mono", "Consolas", monospace;
+        font-size: 12px;
+        background: #f1f5f9;
+        border-radius: 4px;
+        padding: 1px 4px;
+    }
+
+    .ghfu-notes-body pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+    }
+
+    .ghfu-notes-body a {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .ghfu-notes-body table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.8em 0;
+        font-size: 12px;
+    }
+
+    .ghfu-notes-body th,
+    .ghfu-notes-body td {
+        border: 1px solid #dbe6f3;
+        padding: 6px 8px;
+        vertical-align: top;
+    }
+
+    .ghfu-notes-body th {
+        background: #f8fafc;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .ghfu-notes-body details {
+        border: 1px solid #dbe6f3;
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin: 0.8em 0;
+        background: #fcfdff;
+    }
+
+    .ghfu-notes-body summary {
+        cursor: pointer;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .ghfu-notes-body img {
+        max-width: 100%;
+        height: auto;
+        vertical-align: middle;
+    }
+
+    .ghfu-notes-body blockquote {
+        border-left: 4px solid #dbe6f3;
+        padding-left: 12px;
+        margin: 0.8em 0;
+        color: #64748b;
+    }
+
+    .ghfu-notes-body blockquote p {
+        margin: 0.3em 0;
+    }
+
+    .ghfu-notes-body hr {
+        border: none;
+        border-top: 1px solid #dbe6f3;
+        margin: 1em 0;
+    }
+
+    .ghfu-notes-body li {
+        margin: 0.2em 0;
+    }
+
+    .ghfu-notes-body strong {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .ghfu-notes-body em {
+        font-style: italic;
+        color: #1e293b;
+    }
+
+    .ghfu-notes-body kbd {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-family: "Cascadia Mono", monospace;
+        font-size: 11px;
+        color: #1e293b;
+    }
+
+    .ghfu-notes-body mark {
+        background: #fef08a;
+        color: #0f172a;
+    }
+
+    .ghfu-notes-body del {
+        text-decoration: line-through;
+        color: #64748b;
+    }
+
+    .ghfu-notes-body ins {
+        text-decoration: underline;
+        background: #dcfce7;
+        padding: 0 2px;
+    }
+
+    .ghfu-notes-body dl {
+        margin: 0.8em 0;
+    }
+
+    .ghfu-notes-body dt {
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 0.5em;
+    }
+
+    .ghfu-notes-body dd {
+        margin-left: 1.5em;
+        margin-bottom: 0.3em;
+    }
+
+    .ghfu-notes-body small {
+        font-size: 0.9em;
+        color: #64748b;
+    }
+
+    .ghfu-notes-body sub,
+    .ghfu-notes-body sup {
+        font-size: 0.8em;
+        line-height: 0;
+        position: relative;
+    }
+
+    .ghfu-notes-body sup {
+        top: -0.5em;
+    }
+
+    .ghfu-notes-body sub {
+        bottom: -0.25em;
+    }
+
+    .ghfu-notes-body form {
+        margin: 0.8em 0;
+        padding: 10px;
+        background: #fcfdff;
+        border: 1px solid #dbe6f3;
+        border-radius: 8px;
+    }
+
+    @media (max-width: 1000px) {
+        .ghfu-notes-box {
+            top: 20px;
+            right: 20px;
+            bottom: 20px;
+            left: 20px;
+        }
+    }
+</style>
+
+<div class="cbi-map" id="ghfu-root">
+    <h2 id="ghfu_title"></h2>
+    <p class="ghfu-subtitle" id="ghfu_subtitle"></p>
+    <div class="cbi-section">
+        <div class="cbi-value">
+            <label class="cbi-value-title" id="ghfu_status_label"></label>
+            <div class="cbi-value-field" id="ghfu_status"></div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" for="ghfu_repo" id="ghfu_repo_label"></label>
+            <div class="cbi-value-field">
+                <input id="ghfu_repo" class="cbi-input-text ghfu-wide" type="text" value="smallprogram/OpenWrtAction" />
+            </div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" for="ghfu_release" id="ghfu_release_label"></label>
+            <div class="cbi-value-field">
+                <input id="ghfu_release" class="cbi-input-text ghfu-wide" type="text" readonly="readonly" />
+            </div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" for="ghfu_keep" id="ghfu_keep_label"></label>
+            <div class="cbi-value-field">
+                <input id="ghfu_keep" type="checkbox" checked="checked" />
+            </div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" for="ghfu_timeout" id="ghfu_timeout_label"></label>
+            <div class="cbi-value-field" style="display:flex;align-items:center;gap:10px;">
+                <input id="ghfu_timeout" class="cbi-input-text" type="number" min="5" max="300" value="15" style="width:80px;" />
+                <span id="ghfu_timeout_hint" style="color:#64748b;font-size:12px;"></span>
+            </div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" for="ghfu_search" id="ghfu_search_label"></label>
+            <div class="cbi-value-field">
+                <input id="ghfu_search" class="cbi-input-text ghfu-wide" type="text" />
+            </div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" id="ghfu_assets_label"></label>
+            <div class="cbi-value-field">
+                <div id="ghfu_assets"></div>
+            </div>
+        </div>
+
+        <div class="cbi-value">
+            <label class="cbi-value-title" for="ghfu_log" id="ghfu_log_label"></label>
+            <div class="cbi-value-field">
+                <textarea id="ghfu_log" class="cbi-input-textarea" readonly="readonly"></textarea>
+            </div>
+        </div>
+
+        <div class="cbi-page-actions">
+            <button class="cbi-button cbi-button-neutral" id="ghfu_backup" type="button"></button>
+            <button class="cbi-button cbi-button-action" id="ghfu_refresh" type="button"></button>
+            <button class="cbi-button cbi-button-neutral" id="ghfu_notes" type="button" disabled="disabled"></button>
+            <button class="cbi-button cbi-button-apply" id="ghfu_upgrade" type="button" disabled="disabled"></button>
+        </div>
+    </div>
+</div>
+
+<div id="ghfu-upgrade-modal">
+    <div class="ghfu-modal-box">
+        <div class="ghfu-modal-spinner"></div>
+        <div class="ghfu-modal-title" id="ghfu_modal_title"></div>
+        <div class="ghfu-modal-msg" id="ghfu_modal_msg"></div>
+    </div>
+</div>
+
+<div id="ghfu-notes-modal">
+    <div class="ghfu-notes-box">
+        <div class="ghfu-notes-header">
+            <div class="ghfu-notes-title" id="ghfu_notes_title"></div>
+            <button class="cbi-button cbi-button-negative ghfu-notes-close" id="ghfu_notes_close" type="button"></button>
+        </div>
+        <div class="ghfu-notes-body" id="ghfu_notes_body"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var I18N = {
+        title: '<%:GitHub Firmware Upgrade%>',
+        subtitle: '<%:Firmware upgrade assistant based on GitHub Release.%>',
+        repoLabel: '<%:GitHub Repository%>',
+        searchLabel: '<%:Firmware Fuzzy Search%>',
+        searchPlaceholder: '<%:Enter keyword to filter firmware names%>',
+        releaseLabel: '<%:Release/Firmware%>',
+        keepLabel: '<%:Keep Configuration During Upgrade%>',
+        statusLabel: '<%:System and Release Status%>',
+        assetsLabel: '<%:Available Firmware%>',
+        logLabel: '<%:Logs%>',
+        refreshBtn: '<%:Fetch Latest Release%>',
+        upgradeBtn: '<%:Download and Upgrade System%>',
+        waitingStatus: '<%:Waiting to fetch latest release%>',
+        noMatch: '<%:No matching firmware%>',
+        beginFetch: '<%:Fetching latest release%>',
+        fetchFailed: '<%:Fetch failed%>',
+        requestFailed: '<%:Request failed: %>',
+        latestRelease: '<%:Latest release: %>',
+        statusUpdated: '<%:Status updated%>',
+        noNewStop: '<%:No new firmware currently, firmware selection is disabled%>',
+        installTime: '<%:System install time%>',
+        latestRel: '<%:Latest release%>',
+        pubTime: '<%:Published time%>',
+        conclusion: '<%:Conclusion%>',
+        chooseFirmware: '<%:Please select firmware to upgrade%>',
+        chooseAsset: '<%:Please select a firmware asset%>',
+        beginUpgrade: '<%:Preparing upgrade: %>',
+        cmdStarted: '<%:Upgrade command started, device may reboot soon%>',
+        upgradeReqFailed: '<%:Upgrade request failed: %>',
+        selectedFirmware: '<%:Selected firmware: %>',
+        unknown: '<%:unknown%>',
+        backupBtn: '<%:Download Backup%>',
+        upgradingTitle: '<%:Upgrading System%>',
+        upgradingMsg: '<%:System is upgrading, please wait. The page will reload automatically when the system comes back online.%>',
+        beginDownload: '<%:Starting download: %>',
+        countdownPrefix: '<%:System upgrade will start in %>',
+        countdownSuffix: '<%: seconds%>',
+        startingUpgrade: '<%:Starting system upgrade...%>',
+        timeoutLabel: '<%:Fetch Timeout (seconds)%>',
+        timeoutHint: '<%:5 ~ 300 seconds. Limits GitHub API fetch time.%>',
+        fetchTimedOut: '<%:Unable to fetch GitHub Release, please check your network connection%>',
+        notesBtn: '<%:Read Latest Release Notes%>',
+        notesTitle: '<%:Latest Release Notes%>',
+        notesClose: '<%:Close%>',
+        notesEmpty: '<%:No release notes content available%>',
+        fallbackUsedHint: '<%:Latest release assets are not ready yet, using previous release with available firmware.%>',
+        partialAssetsHint: '<%:Some firmware files may still be compiling/uploading for the latest release. Please try again later if your platform is missing.%>'
+    };
+
+    var assets = [];
+    var selectedAsset = null;
+    var latestReleaseName = '';
+    var latestReleaseBodyHtml = '';
+    var latestReleaseBodyText = '';
+    var routerTzOffsetMin = null;
+
+    function byId(id) { return document.getElementById(id); }
+    function t(key) { return I18N[key] || key; }
+
+    function initTexts() {
+        byId('ghfu_title').textContent = t('title');
+        byId('ghfu_subtitle').textContent = t('subtitle');
+        byId('ghfu_repo_label').textContent = t('repoLabel');
+        byId('ghfu_search_label').textContent = t('searchLabel');
+        byId('ghfu_search').placeholder = t('searchPlaceholder');
+        byId('ghfu_release_label').textContent = t('releaseLabel');
+        byId('ghfu_keep_label').textContent = t('keepLabel');
+        byId('ghfu_status_label').textContent = t('statusLabel');
+        byId('ghfu_status').textContent = t('waitingStatus');
+        byId('ghfu_assets_label').textContent = t('assetsLabel');
+        byId('ghfu_log_label').textContent = t('logLabel');
+        byId('ghfu_refresh').textContent = t('refreshBtn');
+        byId('ghfu_notes').textContent = t('notesBtn');
+        byId('ghfu_upgrade').textContent = t('upgradeBtn');
+        byId('ghfu_backup').textContent = t('backupBtn');
+        byId('ghfu_modal_title').textContent = t('upgradingTitle');
+        byId('ghfu_modal_msg').textContent = t('upgradingMsg');
+        byId('ghfu_timeout_label').textContent = t('timeoutLabel');
+        byId('ghfu_timeout_hint').textContent = t('timeoutHint');
+        byId('ghfu_notes_title').textContent = t('notesTitle');
+        byId('ghfu_notes_close').textContent = t('notesClose');
+    }
+
+    function pad2(v) {
+        return v < 10 ? ('0' + v) : String(v);
+    }
+
+    function toRouterDate(dateObj) {
+        if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+            return null;
+        }
+
+        var browserOffset = -new Date().getTimezoneOffset();
+        var targetOffset = (typeof routerTzOffsetMin === 'number') ? routerTzOffsetMin : browserOffset;
+        var shifted = new Date(dateObj.getTime() + (targetOffset - browserOffset) * 60000);
+        return shifted;
+    }
+
+    function formatRouterDate(dateObj) {
+        var d = toRouterDate(dateObj);
+        if (!d) {
+            return '-';
+        }
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' +
+            pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+    }
+
+    function formatEpochToRouter(epoch) {
+        if (!epoch) {
+            return '-';
+        }
+        return formatRouterDate(new Date(epoch * 1000));
+    }
+
+    function formatIsoToRouter(iso) {
+        if (!iso) {
+            return '-';
+        }
+        return formatRouterDate(new Date(iso));
+    }
+
+    function appendLog(line) {
+        var el = byId('ghfu_log');
+        var ts = formatRouterDate(new Date());
+        el.value += '[' + ts + '] ' + line + '\n';
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function setStatus(text) {
+        byId('ghfu_status').textContent = text;
+    }
+
+    function escHtml(s) {
+        return String(s || '').replace(/[&<>"']/g, function(c) {
+            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+        });
+    }
+
+    function sanitizeHtmlFragment(rawHtml) {
+        var allowedTags = {
+            a: true, img: true, table: true, thead: true, tbody: true, tr: true, th: true, td: true,
+            details: true, summary: true, div: true, span: true, p: true, br: true, hr: true,
+            ul: true, ol: true, li: true, strong: true, em: true, b: true, i: true,
+            h1: true, h2: true, h3: true, h4: true, h5: true, h6: true,
+            code: true, pre: true, blockquote: true, kbd: true, mark: true, del: true, ins: true,
+            section: true, article: true, aside: true, nav: true, footer: true, header: true,
+            form: true, input: true, button: true, label: true, fieldset: true, textarea: true,
+            dl: true, dt: true, dd: true, small: true, sub: true, sup: true
+        };
+
+        var allowedAttrs = {
+            a: { href: true, target: true, rel: true, id: true, class: true },
+            img: { src: true, alt: true, width: true, height: true, class: true, id: true },
+            td: { colspan: true, rowspan: true, align: true, class: true, id: true },
+            th: { colspan: true, rowspan: true, align: true, class: true, id: true },
+            button: { type: true, class: true, id: true },
+            input: { type: true, class: true, id: true, disabled: true, checked: true },
+            textarea: { class: true, id: true, disabled: true, readonly: true },
+            div: { class: true, id: true },
+            span: { class: true, id: true },
+            code: { class: true, id: true },
+            pre: { class: true, id: true },
+            blockquote: { class: true, id: true },
+            hr: { class: true, id: true },
+            '*': { class: true, id: true, 'data-sourceline': true }
+        };
+
+        var tpl = document.createElement('template');
+        tpl.innerHTML = rawHtml;
+
+        function safeUrl(url) {
+            return /^https?:\/\//i.test(url || '');
+        }
+
+        function clean(node) {
+            if (!node || !node.childNodes) {
+                return;
+            }
+
+            var children = Array.prototype.slice.call(node.childNodes);
+            children.forEach(function(child) {
+                if (child.nodeType === 1) {
+                    var tag = child.tagName.toLowerCase();
+                    if (!allowedTags[tag]) {
+                        var txt = document.createTextNode(child.textContent || '');
+                        node.replaceChild(txt, child);
+                        return;
+                    }
+
+                    var attrs = Array.prototype.slice.call(child.attributes || []);
+                    attrs.forEach(function(a) {
+                        var name = a.name.toLowerCase();
+                        var value = a.value || '';
+                        var tagAttrs = allowedAttrs[tag] || {};
+                        var globalAttrs = allowedAttrs['*'] || {};
+                        var keep = !!tagAttrs[name] || !!globalAttrs[name];
+                        if (!keep || name.indexOf('on') === 0 || name === 'style') {
+                            child.removeAttribute(a.name);
+                            return;
+                        }
+                        if ((name === 'href' || name === 'src') && !safeUrl(value)) {
+                            child.removeAttribute(a.name);
+                        }
+                    });
+
+                    if (tag === 'a') {
+                        child.setAttribute('target', '_blank');
+                        child.setAttribute('rel', 'noopener noreferrer');
+                    }
+
+                    clean(child);
+                } else if (child.nodeType !== 3) {
+                    node.removeChild(child);
+                }
+            });
+        }
+
+        clean(tpl.content);
+        return tpl.innerHTML;
+    }
+
+    function renderInlineMarkdown(text) {
+        var s = escHtml(text || '');
+        s = s.replace(/\[!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)\]\((https?:\/\/[^\s)]+)\)/g,
+            '<a href="$3" target="_blank" rel="noopener noreferrer"><img src="$2" alt="$1"></a>');
+        s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$2" alt="$1">');
+        s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+        s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        s = s.replace(/_([^_]+)_/g, '<em>$1</em>');
+        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+        s = s.replace(/\+\+([^+]+)\+\+/g, '<ins>$1</ins>');
+        return s;
+    }
+
+    function renderMarkdownFallback(md) {
+        if (!md) {
+            return '<p>' + escHtml(t('notesEmpty')) + '</p>';
+        }
+
+        var lines = String(md).replace(/\r\n?/g, '\n').split('\n');
+        var html = [];
+        var inCode = false;
+        var inUl = false;
+        var inOl = false;
+        var inBlockquote = false;
+        var para = [];
+        var blockquoteLines = [];
+
+        function flushPara() {
+            if (para.length) {
+                html.push('<p>' + renderInlineMarkdown(para.join(' ')) + '</p>');
+                para = [];
+            }
+        }
+
+        function flushBlockquote() {
+            if (blockquoteLines.length) {
+                var blockquoteContent = [];
+                for (var b = 0; b < blockquoteLines.length; b++) {
+                    blockquoteContent.push('<p>' + renderInlineMarkdown(blockquoteLines[b]) + '</p>');
+                }
+                html.push('<blockquote>' + blockquoteContent.join('') + '</blockquote>');
+                blockquoteLines = [];
+            }
+        }
+
+        function closeLists() {
+            if (inUl) {
+                html.push('</ul>');
+                inUl = false;
+            }
+            if (inOl) {
+                html.push('</ol>');
+                inOl = false;
+            }
+        }
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+
+            if (/^```/.test(line)) {
+                flushPara();
+                flushBlockquote();
+                closeLists();
+                if (!inCode) {
+                    html.push('<pre><code>');
+                    inCode = true;
+                } else {
+                    html.push('</code></pre>');
+                    inCode = false;
+                }
+                continue;
+            }
+
+            if (inCode) {
+                html.push(escHtml(line) + '\n');
+                continue;
+            }
+
+            if (!line.trim()) {
+                flushPara();
+                if (inBlockquote && blockquoteLines.length) {
+                    flushBlockquote();
+                    inBlockquote = false;
+                }
+                closeLists();
+                continue;
+            }
+
+            if (/<\/?[a-zA-Z][^>]*>/.test(line)) {
+                flushPara();
+                flushBlockquote();
+                closeLists();
+                html.push(sanitizeHtmlFragment(line));
+                continue;
+            }
+
+            if (/^(---|\*\*\*|___)\s*$/.test(line)) {
+                flushPara();
+                flushBlockquote();
+                closeLists();
+                html.push('<hr>');
+                continue;
+            }
+
+            var h = line.match(/^(#{1,6})\s+(.*)$/);
+            if (h) {
+                flushPara();
+                flushBlockquote();
+                closeLists();
+                var level = h[1].length;
+                html.push('<h' + level + '>' + renderInlineMarkdown(h[2]) + '</h' + level + '>');
+                continue;
+            }
+
+            var bq = line.match(/^>\s*(.*)$/);
+            if (bq) {
+                flushPara();
+                if (!inBlockquote) {
+                    inBlockquote = true;
+                }
+                blockquoteLines.push(bq[1]);
+                continue;
+            }
+
+            if (inBlockquote && !line.match(/^>/)) {
+                flushBlockquote();
+                inBlockquote = false;
+            }
+
+            var ul = line.match(/^[-*+]\s+(.*)$/);
+            if (ul) {
+                flushPara();
+                if (inOl) {
+                    html.push('</ol>');
+                    inOl = false;
+                }
+                if (!inUl) {
+                    html.push('<ul>');
+                    inUl = true;
+                }
+                html.push('<li>' + renderInlineMarkdown(ul[1]) + '</li>');
+                continue;
+            }
+
+            var ol = line.match(/^\d+\.\s+(.*)$/);
+            if (ol) {
+                flushPara();
+                if (inUl) {
+                    html.push('</ul>');
+                    inUl = false;
+                }
+                if (!inOl) {
+                    html.push('<ol>');
+                    inOl = true;
+                }
+                html.push('<li>' + renderInlineMarkdown(ol[1]) + '</li>');
+                continue;
+            }
+
+            para.push(line.trim());
+        }
+
+        flushPara();
+        flushBlockquote();
+        closeLists();
+        if (inCode) {
+            html.push('</code></pre>');
+        }
+
+        return sanitizeHtmlFragment(html.join(''));
+    }
+
+    function parseJsonResponse(r) {
+        return r.text().then(function(txt) {
+            try {
+                return JSON.parse(txt);
+            } catch (e) {
+                throw new Error('Server returned invalid JSON response');
+            }
+        });
+    }
+
+    function request(url, data) {
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: new URLSearchParams(data).toString()
+        }).then(parseJsonResponse);
+    }
+
+    function requestWithTimeout(url, data, timeoutMs) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: new URLSearchParams(data).toString(),
+            signal: controller.signal
+        }).then(function(r) {
+            clearTimeout(timer);
+            return parseJsonResponse(r);
+        }).catch(function(err) {
+            clearTimeout(timer);
+            throw err;
+        });
+    }
+
+    function humanSize(size) {
+        if (!size || size <= 0) return '0 B';
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var i = 0;
+        var n = size;
+        while (n >= 1024 && i < units.length - 1) {
+            n /= 1024;
+            i++;
+        }
+        return n.toFixed(i === 0 ? 0 : 2) + ' ' + units[i];
+    }
+
+    function renderAssets() {
+        var box = byId('ghfu_assets');
+        var kw = (byId('ghfu_search').value || '').toLowerCase();
+        box.innerHTML = '';
+
+        var filtered = assets.filter(function(a) {
+            return !kw || (a.name || '').toLowerCase().indexOf(kw) !== -1;
+        });
+
+        if (!filtered.length) {
+            box.textContent = t('noMatch');
+            return;
+        }
+
+        filtered.forEach(function(a, idx) {
+            var row = document.createElement('div');
+            row.className = 'ghfu-asset-row';
+
+            var id = 'ghfu_asset_' + idx;
+            var input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'ghfu_asset';
+            input.id = id;
+            input.value = a.url || '';
+            input.addEventListener('change', function() {
+                selectedAsset = a;
+                var txt = (latestReleaseName ? (latestReleaseName + ' / ') : '') + (a.name || '');
+                byId('ghfu_release').value = txt;
+                appendLog(t('selectedFirmware') + (a.name || ''));
+            });
+
+            if (selectedAsset && selectedAsset.url === a.url) {
+                input.checked = true;
+            }
+
+            var label = document.createElement('label');
+            label.setAttribute('for', id);
+            label.textContent = (a.name || '') + ' (' + humanSize(a.size || 0) + ')';
+
+            row.appendChild(input);
+            row.appendChild(label);
+            box.appendChild(row);
+        });
+    }
+
+    function normalizeAssets(raw) {
+        if (Array.isArray(raw)) {
+            return raw;
+        }
+        if (!raw || typeof raw !== 'object') {
+            return [];
+        }
+        var keys = Object.keys(raw).sort(function(a, b) {
+            var na = parseInt(a, 10), nb = parseInt(b, 10);
+            if (!isNaN(na) && !isNaN(nb)) {
+                return na - nb;
+            }
+            return String(a).localeCompare(String(b));
+        });
+        var out = [];
+        keys.forEach(function(k) {
+            if (raw[k] && typeof raw[k] === 'object') {
+                out.push(raw[k]);
+            }
+        });
+        return out;
+    }
+
+    function refreshStatus() {
+        var repo = (byId('ghfu_repo').value || '').trim();
+        var timeoutSec = parseInt(byId('ghfu_timeout').value, 10) || 15;
+        if (timeoutSec < 5) timeoutSec = 5;
+        if (timeoutSec > 300) timeoutSec = 300;
+
+        byId('ghfu_refresh').disabled = true;
+        byId('ghfu_notes').disabled = true;
+        appendLog(t('beginFetch'));
+
+        requestWithTimeout(
+            '<%=url([[admin]], [[system]], [[ghfu]], [[status]])%>',
+            { repo: repo, fetch_timeout: String(timeoutSec) },
+            (timeoutSec + 5) * 1000
+        ).then(function(resp) {
+                byId('ghfu_refresh').disabled = false;
+                if (!resp.ok) {
+                    byId('ghfu_notes').disabled = true;
+                    latestReleaseBodyHtml = '';
+                    latestReleaseBodyText = '';
+                    setStatus(resp.msg || t('fetchFailed'));
+                    appendLog(resp.msg || t('fetchFailed'));
+                    return;
+                }
+
+                byId('ghfu_repo').value = resp.repo || repo;
+                if (resp.config) {
+                    byId('ghfu_release').value = resp.config.selected_release || '';
+                    byId('ghfu_keep').checked = (resp.config.keep_config || '1') === '1';
+                }
+                if (typeof resp.fetch_timeout === 'number') {
+                    byId('ghfu_timeout').value = String(resp.fetch_timeout);
+                }
+
+                if (typeof resp.tz_offset_min === 'number') {
+                    routerTzOffsetMin = resp.tz_offset_min;
+                }
+
+                latestReleaseName = (resp.latest && resp.latest.release_name) ? resp.latest.release_name : '';
+                latestReleaseBodyHtml = (resp.latest && resp.latest.body_html) ? String(resp.latest.body_html) : '';
+                latestReleaseBodyText = (resp.latest && resp.latest.body) ? String(resp.latest.body) : '';
+                assets = normalizeAssets(resp.latest && resp.latest.assets);
+                selectedAsset = null;
+                // Always reset filter on refresh to avoid stale keyword hiding all assets.
+                byId('ghfu_search').value = '';
+                renderAssets();
+                byId('ghfu_notes').disabled = false;
+                // Allow repeated upgrade even when current system is already the latest,
+                // as long as release assets are available for selection.
+                byId('ghfu_upgrade').disabled = (assets.length === 0);
+
+                var installText = t('installTime') + ': ' + (resp.install_epoch ? formatEpochToRouter(resp.install_epoch) : t('unknown'));
+                var releaseText = t('latestRel') + ': ' + ((resp.latest && resp.latest.release_name) || '-');
+                var conclusionText = t('conclusion') + ': ' + (resp.msg || '-');
+                var conclusionCls = resp.has_new ? 'ghfu-conclusion-new' : 'ghfu-conclusion-ok';
+                var hintHtml = '';
+                if (resp.fallback_used) {
+                    hintHtml = '<div class="ghfu-status-line ghfu-conclusion-warn">' + escHtml(t('fallbackUsedHint')) + '</div>';
+                } else if (resp.partial_assets) {
+                    hintHtml = '<div class="ghfu-status-line ghfu-conclusion-warn">' + escHtml(t('partialAssetsHint')) + '</div>';
+                }
+                byId('ghfu_status').innerHTML =
+                    '<div class="ghfu-status-line">' + escHtml(installText) + '</div>' +
+                    '<div class="ghfu-status-line">' + escHtml(releaseText) + '</div>' +
+                    '<div class="ghfu-status-line ' + conclusionCls + '">' + escHtml(conclusionText) + '</div>' +
+                    hintHtml;
+
+                appendLog(t('latestRelease') + ((resp.latest && resp.latest.release_name) || '-'));
+                appendLog(resp.msg || t('statusUpdated'));
+                if (resp.fallback_used) {
+                    appendLog(t('fallbackUsedHint'));
+                } else if (resp.partial_assets) {
+                    appendLog(t('partialAssetsHint'));
+                }
+            })
+            .catch(function(err) {
+                byId('ghfu_refresh').disabled = false;
+                byId('ghfu_notes').disabled = true;
+                latestReleaseBodyHtml = '';
+                latestReleaseBodyText = '';
+                setStatus(t('fetchTimedOut'));
+                byId('ghfu_upgrade').disabled = true;
+                if (err && err.name === 'AbortError') {
+                    appendLog(t('fetchTimedOut'));
+                } else {
+                    appendLog(t('requestFailed') + err);
+                }
+            });
+    }
+
+    function showNotesModal() {
+        var html;
+        if (latestReleaseBodyHtml) {
+            html = sanitizeHtmlFragment(latestReleaseBodyHtml);
+        } else if (latestReleaseBodyText) {
+            html = renderMarkdownFallback(latestReleaseBodyText);
+        } else {
+            html = '<p>' + escHtml(t('notesEmpty')) + '</p>';
+        }
+        byId('ghfu_notes_body').innerHTML = html;
+        byId('ghfu-notes-modal').style.display = 'block';
+    }
+
+    function hideNotesModal() {
+        byId('ghfu-notes-modal').style.display = 'none';
+    }
+
+    function doDownload() {
+        var repo = (byId('ghfu_repo').value || '').trim();
+        var selectedRelease = (byId('ghfu_release').value || '').trim();
+        var keepConfig = byId('ghfu_keep').checked ? '1' : '0';
+
+        if (!selectedRelease) {
+            appendLog(t('chooseFirmware'));
+            return;
+        }
+
+        if (!selectedAsset || !selectedAsset.url) {
+            appendLog(t('chooseAsset'));
+            return;
+        }
+
+        byId('ghfu_upgrade').disabled = true;
+        byId('ghfu_refresh').disabled = true;
+        byId('ghfu_backup').disabled = true;
+
+        appendLog(t('beginDownload') + (selectedAsset.name || selectedRelease));
+
+        request('<%=url([[admin]], [[system]], [[ghfu]], [[download]])%>', {
+            repo: repo,
+            selected_release: selectedRelease,
+            keep_config: keepConfig,
+            asset_url: selectedAsset.url,
+            asset_name: selectedAsset.name || selectedRelease
+        }).then(function(resp) {
+            var lines = resp.logs || [];
+            lines.forEach(appendLog);
+            if (!resp.ok) {
+                byId('ghfu_upgrade').disabled = false;
+                byId('ghfu_refresh').disabled = false;
+                byId('ghfu_backup').disabled = false;
+                return;
+            }
+            startUpgradeCountdown(resp.fw_name, keepConfig);
+        }).catch(function(err) {
+            appendLog(t('upgradeReqFailed') + err);
+            byId('ghfu_upgrade').disabled = false;
+            byId('ghfu_refresh').disabled = false;
+            byId('ghfu_backup').disabled = false;
+        });
+    }
+
+    function startUpgradeCountdown(fwName, keepConfig) {
+        var sec = 5;
+        appendLog(t('countdownPrefix') + sec + t('countdownSuffix'));
+        var timer = setInterval(function() {
+            sec--;
+            if (sec <= 0) {
+                clearInterval(timer);
+                appendLog(t('startingUpgrade'));
+                doUpgradeRequest(fwName, keepConfig);
+            } else {
+                appendLog(t('countdownPrefix') + sec + t('countdownSuffix'));
+            }
+        }, 1000);
+    }
+
+    function doUpgradeRequest(fwName, keepConfig) {
+        request('<%=url([[admin]], [[system]], [[ghfu]], [[upgrade]])%>', {
+            fw_name: fwName,
+            keep_config: keepConfig
+        }).then(function(resp) {
+            var lines = resp.logs || [];
+            lines.forEach(appendLog);
+            if (resp.ok && resp.rebooting) {
+                showUpgradeModal();
+                pollForReboot();
+            }
+        }).catch(function(err) {
+            appendLog(t('upgradeReqFailed') + err);
+            byId('ghfu_upgrade').disabled = false;
+            byId('ghfu_refresh').disabled = false;
+            byId('ghfu_backup').disabled = false;
+        });
+    }
+
+    function showUpgradeModal() {
+        var modal = byId('ghfu-upgrade-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function pollForReboot() {
+        setTimeout(function() {
+            fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' })
+                .then(function(r) {
+                    if (r.ok) {
+                        window.location.reload();
+                    } else {
+                        pollForReboot();
+                    }
+                })
+                .catch(function() {
+                    pollForReboot();
+                });
+        }, 5000);
+    }
+
+    byId('ghfu_refresh').addEventListener('click', refreshStatus);
+    byId('ghfu_upgrade').addEventListener('click', doDownload);
+    byId('ghfu_search').addEventListener('input', renderAssets);
+    byId('ghfu_backup').addEventListener('click', function() {
+        window.location.href = '<%=url([[admin]], [[system]], [[ghfu]], [[backup]])%>';
+    });
+    byId('ghfu_notes').addEventListener('click', showNotesModal);
+    byId('ghfu_notes_close').addEventListener('click', hideNotesModal);
+    byId('ghfu-notes-modal').addEventListener('click', function(ev) {
+        if (ev.target === byId('ghfu-notes-modal')) {
+            hideNotesModal();
+        }
+    });
+
+    initTexts();
+    refreshStatus();
+})();
+</script>
+
+<%+footer%>
