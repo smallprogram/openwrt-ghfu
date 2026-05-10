@@ -7,30 +7,77 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
 <%+header%>
 
 <style>
+    /* ── CSS变量：亮色主题 ─────────────────────────────── */
+    :root {
+        --ghfu-text:          #1e293b;
+        --ghfu-text-muted:    #475569;
+        --ghfu-border:        #d1d5db;
+        --ghfu-bg-card:       transparent;
+        --ghfu-bg-status:     #eff6ff;
+        --ghfu-border-status: #93c5fd;
+        --ghfu-text-status:   #1e3a8a;
+        --ghfu-bg-assets:     transparent;
+        --ghfu-border-assets: #d1d5db;
+        --ghfu-divider:       #e5e7eb;
+        --ghfu-log-bg:        #0f172a;
+        --ghfu-log-text:      #dbeafe;
+        --ghfu-log-border:    #334155;
+        --ghfu-ok:            #16a34a;
+        --ghfu-new:           #dc2626;
+        --ghfu-warn:          #d97706;
+        --ghfu-modal-bg:      #ffffff;
+        --ghfu-modal-text:    #1e293b;
+        --ghfu-modal-muted:   #475569;
+        --ghfu-spinner-track: #e2e8f0;
+        --ghfu-spinner-head:  #2563eb;
+        --ghfu-overlay:       rgba(15, 23, 42, 0.70);
+    }
+
+    /* ── 暗色主题变量覆盖（JS检测后设置 data-ghfu-dark 属性触发） ── */
+    #ghfu-root[data-ghfu-dark] {
+        --ghfu-text:          #e2e8f0;
+        --ghfu-text-muted:    #94a3b8;
+        --ghfu-border:        #334155;
+        --ghfu-bg-status:     #1e2d40;
+        --ghfu-border-status: #3b82f6;
+        --ghfu-text-status:   #93c5fd;
+        --ghfu-border-assets: #334155;
+        --ghfu-divider:       #1e293b;
+        --ghfu-log-bg:        #0a0f1e;
+        --ghfu-log-text:      #bfdbfe;
+        --ghfu-log-border:    #1e3a5f;
+        --ghfu-ok:            #4ade80;
+        --ghfu-new:           #f87171;
+        --ghfu-warn:          #fbbf24;
+        --ghfu-modal-bg:      #1e293b;
+        --ghfu-modal-text:    #e2e8f0;
+        --ghfu-modal-muted:   #94a3b8;
+        --ghfu-spinner-track: #334155;
+        --ghfu-spinner-head:  #60a5fa;
+        --ghfu-overlay:       rgba(0, 0, 0, 0.80);
+    }
+
+    /* ── 组件样式（全部使用CSS变量）─────────────────────── */
     #ghfu-root {
         max-width: none;
         margin: 0;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-        border: 1px solid #d9e3f0;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
         padding: 14px 16px 12px;
     }
 
     #ghfu-root h2 {
         margin: 0 0 8px;
-        color: #0f172a;
+        color: var(--ghfu-text);
         letter-spacing: 0;
     }
 
     #ghfu-root .ghfu-subtitle {
-        color: #475569;
+        color: var(--ghfu-text-muted);
         margin: 0 0 14px;
         font-size: 12px;
     }
 
     #ghfu-root .cbi-value-title {
-        color: #1e293b;
+        color: var(--ghfu-text) !important;
         font-weight: 600;
     }
 
@@ -44,11 +91,11 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         width: 1000px;
         max-width: 100%;
         box-sizing: border-box;
-        border: 1px solid #bfdbfe;
+        border: 1px solid var(--ghfu-border-status);
         border-radius: 8px;
-        background: #eff6ff;
+        background: var(--ghfu-bg-status);
         padding: 10px 12px;
-        color: #1e3a8a;
+        color: var(--ghfu-text-status);
         line-height: 1.5;
     }
 
@@ -57,18 +104,24 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         max-width: 100%;
         max-height: 280px;
         overflow: auto;
-        border: 1px solid #d2ddeb;
+        border: 1px solid var(--ghfu-border-assets);
         border-radius: 8px;
         padding: 8px 10px;
-        background: #fcfdff;
+        background: var(--ghfu-bg-assets);
     }
 
     #ghfu_assets .ghfu-asset-row {
         padding: 6px 4px;
-        border-bottom: 1px dashed #dbe6f3;
+        border-bottom: 1px dashed var(--ghfu-divider);
         display: flex;
         align-items: center;
         gap: 8px;
+        color: var(--ghfu-text);
+    }
+
+    #ghfu_assets .ghfu-asset-row label {
+        color: var(--ghfu-text);
+        cursor: pointer;
     }
 
     #ghfu_assets .ghfu-asset-row:last-child {
@@ -80,17 +133,17 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         max-width: 100%;
         min-height: 610px;
         border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        background: #0f172a;
-        color: #dbeafe;
+        border: 1px solid var(--ghfu-log-border);
+        background: var(--ghfu-log-bg);
+        color: var(--ghfu-log-text);
         font-family: "Cascadia Mono", "JetBrains Mono", "Consolas", monospace;
         line-height: 1.45;
     }
 
     .ghfu-status-line { margin: 2px 0; }
-    .ghfu-conclusion-ok { color: #15803d; font-weight: 700; }
-    .ghfu-conclusion-new { color: #b91c1c; font-weight: 700; }
-    .ghfu-conclusion-warn { color: #b45309; font-weight: 700; }
+    .ghfu-conclusion-ok   { color: var(--ghfu-ok);   font-weight: 700; }
+    .ghfu-conclusion-new  { color: var(--ghfu-new);  font-weight: 700; }
+    .ghfu-conclusion-warn { color: var(--ghfu-warn); font-weight: 700; }
 
     #ghfu-root .cbi-page-actions {
         margin-top: 14px;
@@ -103,9 +156,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     }
 
     @media (max-width: 760px) {
-        #ghfu-root {
-            padding: 12px;
-        }
+        #ghfu-root { padding: 12px; }
     }
 
     #ghfu-upgrade-modal {
@@ -113,26 +164,26 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.75);
+        background: var(--ghfu-overlay);
         z-index: 9999;
         align-items: center;
         justify-content: center;
     }
 
     .ghfu-modal-box {
-        background: #ffffff;
+        background: var(--ghfu-modal-bg);
         border-radius: 12px;
         padding: 36px 48px;
         text-align: center;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
         max-width: 420px;
         width: 90%;
     }
 
     .ghfu-modal-spinner {
         width: 48px; height: 48px;
-        border: 5px solid #e2e8f0;
-        border-top-color: #2563eb;
+        border: 5px solid var(--ghfu-spinner-track);
+        border-top-color: var(--ghfu-spinner-head);
         border-radius: 50%;
         animation: ghfu-spin 0.8s linear infinite;
         margin: 0 auto 20px;
@@ -145,13 +196,13 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     .ghfu-modal-title {
         font-size: 18px;
         font-weight: 700;
-        color: #0f172a;
+        color: var(--ghfu-modal-text);
         margin-bottom: 10px;
     }
 
     .ghfu-modal-msg {
         font-size: 13px;
-        color: #475569;
+        color: var(--ghfu-modal-muted);
         line-height: 1.6;
     }
 
@@ -191,7 +242,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             <label class="cbi-value-title" for="ghfu_timeout" id="ghfu_timeout_label"></label>
             <div class="cbi-value-field" style="display:flex;align-items:center;gap:10px;">
                 <input id="ghfu_timeout" class="cbi-input-text" type="number" min="5" max="300" value="15" style="width:80px;" />
-                <span id="ghfu_timeout_hint" style="color:#64748b;font-size:12px;"></span>
+                <span id="ghfu_timeout_hint" style="color:var(--ghfu-text-muted);font-size:12px;"></span>
             </div>
         </div>
 
@@ -292,6 +343,58 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
 
     function byId(id) { return document.getElementById(id); }
     function t(key) { return I18N[key] || key; }
+
+    /* 检测当前主题是否为暗色，并给 root 元素打标记 */
+    function applyTheme() {
+        var root = byId('ghfu-root');
+        if (!root) return;
+        var isDark = false;
+
+        /* 1. 系统媒体查询 */
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            isDark = true;
+        }
+
+        /* 2. 常见暗色类名（body / html） */
+        if (!isDark) {
+            var darkClasses = ['dark', 'is-dark', 'night', 'dark-mode', 'theme-dark', 'luci-dark'];
+            var body = document.body;
+            var html = document.documentElement;
+            for (var i = 0; i < darkClasses.length; i++) {
+                if (body.classList.contains(darkClasses[i]) ||
+                    html.classList.contains(darkClasses[i])) {
+                    isDark = true;
+                    break;
+                }
+            }
+        }
+
+        /* 3. data-theme / data-color-scheme 属性 */
+        if (!isDark) {
+            var dt = document.body.getAttribute('data-theme') ||
+                     document.body.getAttribute('data-color-scheme') ||
+                     document.documentElement.getAttribute('data-theme');
+            if (dt && dt.indexOf('dark') !== -1) isDark = true;
+        }
+
+        /* 4. 最终兜底：读取 body 实际背景色亮度 */
+        if (!isDark) {
+            try {
+                var bg = window.getComputedStyle(document.body).backgroundColor;
+                var m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (m) {
+                    var lum = (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255;
+                    if (lum < 0.4) isDark = true;
+                }
+            } catch (e) {}
+        }
+
+        if (isDark) {
+            root.setAttribute('data-ghfu-dark', '1');
+        } else {
+            root.removeAttribute('data-ghfu-dark');
+        }
+    }
 
     function initTexts() {
         byId('ghfu_title').textContent = t('title');
@@ -694,6 +797,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     byId('ghfu_notes').addEventListener('click', openLatestReleasePage);
 
     initTexts();
+    applyTheme();
     refreshStatus();
 })();
 </script>
