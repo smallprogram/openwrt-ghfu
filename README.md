@@ -59,3 +59,16 @@ It allows users to check, download, and upgrade firmware directly from GitHub Re
 - Users maintaining custom firmware releases on GitHub.
 - Users who prefer upgrading firmware from LuCI instead of CLI.
 - Operational workflows requiring visible status and logs around upgrades.
+
+---
+
+## License / 许可证
+
+- SPDX: GPL-3.0-only
+- License file: `luci-app-ghfu/LICENSE`
+- Repository: https://github.com/smallprogram/luci-app-ghfu
+- Copyright (C) 2026 smallprogram
+
+This project is licensed under GNU General Public License v3.0 only.
+
+本项目采用 GNU General Public License v3.0 only 许可证。

@@ -1,3 +1,7 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2026 smallprogram
+-- Repository: https://github.com/smallprogram/luci-app-ghfu
+
 module("luci.controller.ghfu", package.seeall)
 
 local http = require "luci.http"
