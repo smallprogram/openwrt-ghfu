@@ -2,6 +2,9 @@
 
 集成固件地址：https://github.com/smallprogram/OpenWrtAction
 
+<img width="1682" height="877" alt="image" src="https://github.com/user-attachments/assets/f13fb148-7ccc-4149-ba2f-4bc8d7dde1ad" />
+
+
 ## 中文说明
 
 `luci-app-ghfu` 是一个用于 OpenWrt / ImmortalWrt 的 LuCI 固件升级插件。
