@@ -115,6 +115,25 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         margin-bottom: 0;
     }
 
+    .ghfu-card-basic .cbi-value {
+        display: grid;
+        grid-template-columns: 150px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+    }
+
+    .ghfu-card-basic .cbi-value-title {
+        margin: 0;
+        text-align: left;
+    }
+
+    .ghfu-card-basic .cbi-value-field,
+    .ghfu-card-basic .cbi-input-text {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
     .ghfu-card-status { grid-column: 1; }
     .ghfu-card-basic { grid-column: 2; }
     .ghfu-card-filter { grid-column: 1; }
@@ -180,9 +199,10 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
 
     .ghfu-filter-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) auto;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 10px 12px;
         align-items: end;
+        width: 100%;
     }
 
     .ghfu-filter-item {
@@ -224,6 +244,8 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     .ghfu-filter-actions {
         display: flex;
         justify-content: flex-end;
+        grid-column: 1 / -1;
+        margin-top: 4px;
     }
 
     @media (max-width: 760px) {
@@ -244,6 +266,9 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         width: 100%;
         max-width: 100%;
         min-height: 260px;
+        height: 260px;
+        display: block;
+        box-sizing: border-box;
         border-radius: 8px;
         border: 1px solid var(--ghfu-log-border);
         background: var(--ghfu-log-bg);
@@ -274,6 +299,31 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         margin: 0;
     }
 
+    .ghfu-btn-accent {
+        background: #834be2 !important;
+        border-color: #834be2 !important;
+        color: #ffffff !important;
+    }
+
+    .ghfu-card-assets .cbi-value {
+        display: grid;
+        grid-template-columns: 140px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+    }
+
+    .ghfu-card-assets .cbi-value-title {
+        margin: 0;
+        text-align: left;
+    }
+
+    .ghfu-card-assets .cbi-value-field,
+    .ghfu-card-filter .cbi-value-field,
+    .ghfu-card-log .cbi-value-field {
+        width: 100%;
+        min-width: 0;
+    }
+
     #ghfu-root .cbi-button {
         border-radius: 10px;
         padding: 8px 14px;
@@ -302,6 +352,12 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
 
         .ghfu-card-actions .cbi-button {
             width: 100%;
+        }
+
+        .ghfu-card-basic .cbi-value,
+        .ghfu-card-assets .cbi-value {
+            grid-template-columns: 1fr;
+            align-items: stretch;
         }
     }
 
@@ -363,9 +419,9 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             <div id="ghfu_status"></div>
 
             <div class="ghfu-card-actions">
-                <button class="cbi-button cbi-button-neutral" id="ghfu_backup" type="button"></button>
+                <button class="cbi-button cbi-button-neutral ghfu-btn-accent" id="ghfu_backup" type="button"></button>
                 <button class="cbi-button cbi-button-action" id="ghfu_refresh" type="button"></button>
-                <button class="cbi-button cbi-button-neutral" id="ghfu_notes" type="button" disabled="disabled"></button>
+                <button class="cbi-button cbi-button-neutral ghfu-btn-accent" id="ghfu_notes" type="button" disabled="disabled"></button>
             </div>
         </div>
 
