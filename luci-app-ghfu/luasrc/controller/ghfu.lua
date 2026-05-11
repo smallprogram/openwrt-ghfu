@@ -328,6 +328,7 @@ function index()
     entry({"admin", "system", "ghfu", "status"}, call("action_status")).leaf = true
     entry({"admin", "system", "ghfu", "config"}, call("action_config")).leaf = true
     entry({"admin", "system", "ghfu", "download"}, call("action_download")).leaf = true
+    entry({"admin", "system", "ghfu", "download_status"}, call("action_download_status")).leaf = true
     entry({"admin", "system", "ghfu", "upgrade"}, call("action_upgrade")).leaf = true
     entry({"admin", "system", "ghfu", "backup"}, call("action_backup")).leaf = true
 end
@@ -511,17 +512,64 @@ function action_download()
         "rc=$?\n",
         "size=$(wc -c < \"$target\" 2>/dev/null)\n",
         "[ -z \"$size\" ] && size=0\n",
-        "echo \"FINISH|$size|$total\" >> \"$progress_log\"\n",
-        "if [ \"$rc\" -ne 0 ] && [ -s \"$raw_log\" ]; then\n",
-        "    cat \"$raw_log\" >> \"$progress_log\"\n",
+        "if [ \"$rc\" -eq 0 ] && [ -s \"$target\" ]; then\n",
+        "    echo \"DONE|OK|$size|$total|$target\" >> \"$progress_log\"\n",
+        "else\n",
+        "    echo \"DONE|FAIL|$size|$total|$target\" >> \"$progress_log\"\n",
+        "    if [ -s \"$raw_log\" ]; then\n",
+        "        sed 's/^/ERR|/' \"$raw_log\" >> \"$progress_log\"\n",
+        "    fi\n",
         "fi\n",
-        "exit \"$rc\"\n",
     })
 
     logs[#logs + 1] = tr("Downloading firmware: ") .. clean_name
-    local rc = sys.call("sh -c " .. util.shellquote(shell_script) .. " >/dev/null 2>&1")
+    local start_cmd = "sh -c " .. util.shellquote("(" .. shell_script .. ") >/dev/null 2>&1 &")
+    local rc = sys.call(start_cmd)
+    if rc ~= 0 then
+        logs[#logs + 1] = tr("Firmware download failed, please check network or GitHub repository")
+        json_resp({ ok = false, logs = logs })
+        return
+    end
 
-    for _, line in ipairs(read_lines(progress_log)) do
+    json_resp({
+        ok = true,
+        started = true,
+        logs = logs
+    })
+end
+
+function action_download_status()
+    local offset = tonumber(trim(http.formvalue("offset") or "0")) or 0
+    if offset < 0 then
+        offset = 0
+    end
+
+    local progress_log = "/tmp/ghfu-download-progress.log"
+    local lines = read_lines(progress_log)
+    local total_lines = #lines
+
+    local done = false
+    local download_ok = false
+    local fw_name = ""
+
+    for _, line in ipairs(lines) do
+        local status, _, _, target = line:match("^DONE|([A-Z]+)|(%d+)|(%d+)|(.+)$")
+        if status then
+            done = true
+            download_ok = (status == "OK")
+            local n = tostring(target or ""):match("/tmp/ghfu_(.+)$")
+            if n and n ~= "" then
+                fw_name = n
+            end
+        end
+    end
+
+    local logs = {}
+    local start_idx = offset + 1
+    if start_idx < 1 then start_idx = 1 end
+
+    for i = start_idx, total_lines do
+        local line = lines[i]
         local pct, size, total, rate = line:match("^PROGRESS|(%d+)|(%d+)|(%d+)|(%-?%d+)$")
         if pct then
             local speed_text = human_bytes(rate) .. "/s"
@@ -531,30 +579,39 @@ function action_download()
                 logs[#logs + 1] = tr("Download progress: ") .. human_bytes(size) .. ", " .. tr("Speed: ") .. speed_text
             end
         else
-            local finished_size, finished_total = line:match("^FINISH|(%d+)|(%d+)$")
-            if finished_size then
-                if tonumber(finished_total) and tonumber(finished_total) > 0 then
-                    logs[#logs + 1] = tr("Download finished: ") .. human_bytes(finished_size) .. "/" .. human_bytes(finished_total)
+            local status2, done_size, done_total, target2 = line:match("^DONE|([A-Z]+)|(%d+)|(%d+)|(.+)$")
+            if status2 then
+                if tonumber(done_total) and tonumber(done_total) > 0 then
+                    logs[#logs + 1] = tr("Download finished: ") .. human_bytes(done_size) .. "/" .. human_bytes(done_total)
                 else
-                    logs[#logs + 1] = tr("Download finished: ") .. human_bytes(finished_size)
+                    logs[#logs + 1] = tr("Download finished: ") .. human_bytes(done_size)
+                end
+
+                if status2 == "OK" then
+                    local name2 = tostring(target2 or ""):match("/tmp/ghfu_(.+)$")
+                    if name2 and name2 ~= "" then
+                        logs[#logs + 1] = name2 .. tr(" downloaded successfully")
+                    end
+                else
+                    logs[#logs + 1] = tr("Firmware download failed, please check network or GitHub repository")
+                end
+            else
+                local err_line = line:match("^ERR|(.+)$")
+                if err_line and trim(err_line) ~= "" then
+                    logs[#logs + 1] = err_line
                 end
             end
         end
     end
 
-    if rc ~= 0 or not fs.access(fw_path) then
-        for _, line in ipairs(read_lines(raw_log)) do
-            if trim(line) ~= "" then
-                logs[#logs + 1] = line
-            end
-        end
-        logs[#logs + 1] = tr("Firmware download failed, please check network or GitHub repository")
-        json_resp({ ok = false, logs = logs })
-        return
-    end
-
-    logs[#logs + 1] = clean_name .. tr(" downloaded successfully")
-    json_resp({ ok = true, logs = logs, fw_name = clean_name })
+    json_resp({
+        ok = true,
+        done = done,
+        download_ok = download_ok,
+        fw_name = fw_name,
+        logs = logs,
+        next_offset = total_lines
+    })
 end
 
 function action_upgrade()

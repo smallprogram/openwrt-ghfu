@@ -543,6 +543,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     var rebootPollTimer = null;
     var rebootPollAttempts = 0;
     var rebootPollLimit = 36;
+    var downloadPollTimer = null;
     var filterPrefix = '';
     var filterMinSizeKb = 0;
     var filterPrefixEnabled = true;
@@ -906,22 +907,51 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         });
     }
 
-    function shouldKeepAsset(asset) {
-        if (!asset || typeof asset !== 'object') {
-            return false;
+    function stopDownloadPolling() {
+        if (downloadPollTimer) {
+            clearTimeout(downloadPollTimer);
+            downloadPollTimer = null;
         }
+    }
 
-        var name = String(asset.name || '');
-        if (/^buildinfo/i.test(name)) {
-            return false;
-        }
+    function restoreButtonsAfterDownload() {
+        byId('ghfu_upgrade').disabled = false;
+        byId('ghfu_refresh').disabled = false;
+        byId('ghfu_backup').disabled = false;
+    }
 
-        var size = Number(asset.size || 0);
-        if (size > 0 && size < 200 * 1024) {
-            return false;
-        }
+    function pollDownloadProgress(keepConfig, offset) {
+        request('<%=url([[admin]], [[system]], [[ghfu]], [[download_status]])%>', {
+            offset: String(offset || 0)
+        }).then(function(resp) {
+            if (!resp || !resp.ok) {
+                appendLog(t('fetchFailed'));
+                restoreButtonsAfterDownload();
+                stopDownloadPolling();
+                return;
+            }
 
-        return true;
+            var lines = resp.logs || [];
+            lines.forEach(appendLog);
+
+            if (resp.done) {
+                stopDownloadPolling();
+                if (resp.download_ok && resp.fw_name) {
+                    startUpgradeCountdown(resp.fw_name, keepConfig);
+                } else {
+                    restoreButtonsAfterDownload();
+                }
+                return;
+            }
+
+            downloadPollTimer = setTimeout(function() {
+                pollDownloadProgress(keepConfig, resp.next_offset || 0);
+            }, 1000);
+        }).catch(function(err) {
+            appendLog(t('requestFailed') + err);
+            restoreButtonsAfterDownload();
+            stopDownloadPolling();
+        });
     }
 
     function refreshStatus() {
@@ -1041,6 +1071,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         byId('ghfu_upgrade').disabled = true;
         byId('ghfu_refresh').disabled = true;
         byId('ghfu_backup').disabled = true;
+        stopDownloadPolling();
 
         appendLog(t('beginDownload') + (selectedAsset.name || selectedRelease));
 
@@ -1055,17 +1086,23 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             var lines = resp.logs || [];
             lines.forEach(appendLog);
             if (!resp.ok) {
-                byId('ghfu_upgrade').disabled = false;
-                byId('ghfu_refresh').disabled = false;
-                byId('ghfu_backup').disabled = false;
+                restoreButtonsAfterDownload();
                 return;
             }
-            startUpgradeCountdown(resp.fw_name, keepConfig);
+
+            if (resp.started) {
+                pollDownloadProgress(keepConfig, 0);
+                return;
+            }
+
+            if (resp.fw_name) {
+                startUpgradeCountdown(resp.fw_name, keepConfig);
+            } else {
+                restoreButtonsAfterDownload();
+            }
         }).catch(function(err) {
             appendLog(t('upgradeReqFailed') + err);
-            byId('ghfu_upgrade').disabled = false;
-            byId('ghfu_refresh').disabled = false;
-            byId('ghfu_backup').disabled = false;
+            restoreButtonsAfterDownload();
         });
     }
 
