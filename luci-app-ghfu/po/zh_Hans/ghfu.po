@@ -242,3 +242,15 @@ msgstr "最新 Release 固件尚未上传完成，已自动使用上一个可用
 
 msgid "Latest release partial firmware may still be compiling, waiting to upload, or failed to compile. If your platform is missing, please wait for the next build result."
 msgstr "最新 Release 的部分固件可能仍在编译、等待上传或编译失败，如缺少你的平台，请等待下次编译结果。"
+
+msgid "SHA256 verification passed: "
+msgstr "SHA256 校验通过："
+
+msgid "SHA256 verification failed, upgrade cancelled"
+msgstr "SHA256 校验失败，已取消升级"
+
+msgid "  Expected: "
+msgstr "  期望值："
+
+msgid "  Got:      "
+msgstr "  实际值："

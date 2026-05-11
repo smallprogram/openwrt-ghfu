@@ -213,6 +213,18 @@ msgstr "Starting system upgrade..."
 msgid "Firmware download failed, please check network or GitHub repository"
 msgstr "Firmware download failed, please check network or GitHub repository"
 
+msgid "SHA256 verification passed: "
+msgstr "SHA256 verification passed: "
+
+msgid "SHA256 verification failed, upgrade cancelled"
+msgstr "SHA256 verification failed, upgrade cancelled"
+
+msgid "  Expected: "
+msgstr "  Expected: "
+
+msgid "  Got:      "
+msgstr "  Got:      "
+
 msgid "Upgrade mode: keep configuration"
 msgstr "Upgrade mode: keep configuration"
 
@@ -245,3 +257,15 @@ msgstr "Latest release assets are not ready yet, using previous release with ava
 
 msgid "Latest release partial firmware may still be compiling, waiting to upload, or failed to compile. If your platform is missing, please wait for the next build result."
 msgstr "Latest release partial firmware may still be compiling, waiting to upload, or failed to compile. If your platform is missing, please wait for the next build result."
+
+msgid "SHA256 verification passed: "
+msgstr "SHA256 verification passed: "
+
+msgid "SHA256 verification failed, upgrade cancelled"
+msgstr "SHA256 verification failed, upgrade cancelled"
+
+msgid "  Expected: "
+msgstr "  Expected: "
+
+msgid "  Got:      "
+msgstr "  Got:      "

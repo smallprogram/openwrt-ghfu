@@ -211,6 +211,18 @@ msgstr ""
 msgid "Firmware download failed, please check network or GitHub repository"
 msgstr ""
 
+msgid "SHA256 verification passed: "
+msgstr ""
+
+msgid "SHA256 verification failed, upgrade cancelled"
+msgstr ""
+
+msgid "  Expected: "
+msgstr ""
+
+msgid "  Got:      "
+msgstr ""
+
 msgid "Upgrade mode: keep configuration"
 msgstr ""
 

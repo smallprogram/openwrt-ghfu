@@ -190,11 +190,14 @@ local function parse_assets(raw_assets)
     local tmp = {}
     for k, a in pairs(raw_assets) do
         if type(a) == "table" then
+            local digest_raw = tostring(a.digest or "")
+            local sha256_val = digest_raw:match("^sha256:([a-f0-9]+)$") or ""
             tmp[#tmp + 1] = {
                 idx = tonumber(k) or (1000000 + #tmp),
                 name = a.name or "",
                 url = a.browser_download_url or "",
-                size = a.size or 0
+                size = a.size or 0,
+                sha256 = sha256_val
             }
         end
     end
@@ -207,7 +210,8 @@ local function parse_assets(raw_assets)
         assets[#assets + 1] = {
             name = a.name,
             url = a.url,
-            size = a.size
+            size = a.size,
+            sha256 = a.sha256
         }
     end
 
@@ -433,6 +437,10 @@ function action_download()
     local asset_url = trim(http.formvalue("asset_url") or "")
     local asset_name = trim(http.formvalue("asset_name") or "firmware.bin.gz")
     local asset_size = tonumber(trim(http.formvalue("asset_size") or "")) or 0
+    local asset_digest = trim(http.formvalue("asset_digest") or "")
+    if not asset_digest:match("^[a-f0-9]+$") then
+        asset_digest = ""
+    end
 
     local logs = {}
 
@@ -513,7 +521,20 @@ function action_download()
         "size=$(wc -c < \"$target\" 2>/dev/null)\n",
         "[ -z \"$size\" ] && size=0\n",
         "if [ \"$rc\" -eq 0 ] && [ -s \"$target\" ]; then\n",
-        "    echo \"DONE|OK|$size|$total|$target\" >> \"$progress_log\"\n",
+        "    sha256=$(sha256sum \"$target\" 2>/dev/null | awk '{print $1}')\n",
+        "    expected=", util.shellquote(asset_digest), "\n",
+        "    if [ -n \"$expected\" ] && [ -n \"$sha256\" ]; then\n",
+        "        if [ \"$sha256\" = \"$expected\" ]; then\n",
+        "            echo \"SHA256OK|$sha256\" >> \"$progress_log\"\n",
+        "            echo \"DONE|OK|$size|$total|$target\" >> \"$progress_log\"\n",
+        "        else\n",
+        "            echo \"SHA256FAIL|$sha256|$expected\" >> \"$progress_log\"\n",
+        "            echo \"DONE|FAIL|$size|$total|$target\" >> \"$progress_log\"\n",
+        "            rm -f \"$target\"\n",
+        "        fi\n",
+        "    else\n",
+        "        echo \"DONE|OK|$size|$total|$target\" >> \"$progress_log\"\n",
+        "    fi\n",
         "else\n",
         "    echo \"DONE|FAIL|$size|$total|$target\" >> \"$progress_log\"\n",
         "    if [ -s \"$raw_log\" ]; then\n",
@@ -550,6 +571,7 @@ function action_download_status()
 
     local done = false
     local download_ok = false
+    local sha256_fail = false
     local fw_name = ""
 
     for _, line in ipairs(lines) do
@@ -562,6 +584,13 @@ function action_download_status()
                 fw_name = n
             end
         end
+        if line:match("^SHA256FAIL|") then
+            sha256_fail = true
+        end
+    end
+
+    if sha256_fail then
+        download_ok = false
     end
 
     local logs = {}
@@ -596,9 +625,21 @@ function action_download_status()
                     logs[#logs + 1] = tr("Firmware download failed, please check network or GitHub repository")
                 end
             else
-                local err_line = line:match("^ERR|(.+)$")
-                if err_line and trim(err_line) ~= "" then
-                    logs[#logs + 1] = err_line
+                local sha256ok_hash = line:match("^SHA256OK|([a-f0-9]+)$")
+                if sha256ok_hash then
+                    logs[#logs + 1] = tr("SHA256 verification passed: ") .. sha256ok_hash
+                else
+                    local comp, exp = line:match("^SHA256FAIL|([a-f0-9]+)|([a-f0-9]+)$")
+                    if comp then
+                        logs[#logs + 1] = tr("SHA256 verification failed, upgrade cancelled")
+                        logs[#logs + 1] = tr("  Expected: ") .. exp
+                        logs[#logs + 1] = tr("  Got:      ") .. comp
+                    else
+                        local err_line = line:match("^ERR|(.+)$")
+                        if err_line and trim(err_line) ~= "" then
+                            logs[#logs + 1] = err_line
+                        end
+                    end
                 end
             end
         end
