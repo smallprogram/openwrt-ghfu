@@ -1197,7 +1197,8 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             keep_config: keepConfig,
             asset_url: selectedAsset.url,
             asset_name: selectedAsset.name || selectedRelease,
-            asset_size: String(selectedAsset.size || 0)
+            asset_size: String(selectedAsset.size || 0),
+            asset_digest: selectedAsset.sha256 || ''
         }).then(function(resp) {
             var lines = normalizeLogLines(resp.logs);
             lines.forEach(appendLog);
