@@ -32,16 +32,53 @@ local function trim(s)
     return (s:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
+local function read_lines(path)
+    local f = io.open(path, "r")
+    if not f then
+        return {}
+    end
+
+    local lines = {}
+    for line in f:lines() do
+        lines[#lines + 1] = line
+    end
+    f:close()
+    return lines
+end
+
+local function human_bytes(n)
+    n = tonumber(n) or 0
+    if n < 0 then
+        n = 0
+    end
+    local units = { "B", "KB", "MB", "GB", "TB" }
+    local idx = 1
+    while n >= 1024 and idx < #units do
+        n = n / 1024
+        idx = idx + 1
+    end
+
+    if idx == 1 then
+        return string.format("%d %s", math.floor(n + 0.5), units[idx])
+    end
+
+    return string.format("%.2f %s", n, units[idx])
+end
+
 local function get_cfg()
     return {
         github_repo = uci:get(CFG, SEC, "github_repo") or "smallprogram/OpenWrtAction",
         selected_release = uci:get(CFG, SEC, "selected_release") or "",
         keep_config = uci:get(CFG, SEC, "keep_config") or "1",
-        fetch_timeout = uci:get(CFG, SEC, "fetch_timeout") or "15"
+        fetch_timeout = uci:get(CFG, SEC, "fetch_timeout") or "15",
+        filter_prefix_enabled = uci:get(CFG, SEC, "filter_prefix_enabled") or "1",
+        filter_prefix = uci:get(CFG, SEC, "filter_prefix") or "buildinfo",
+        filter_min_size_enabled = uci:get(CFG, SEC, "filter_min_size_enabled") or "1",
+        filter_min_size = uci:get(CFG, SEC, "filter_min_size") or "200"
     }
 end
 
-local function set_cfg(repo, selected_release, keep_config, fetch_timeout)
+local function set_cfg(repo, selected_release, keep_config, fetch_timeout, filter_prefix_enabled, filter_prefix, filter_min_size_enabled, filter_min_size)
     if not uci:get(CFG, SEC) then
         uci:section(CFG, "ghfu", SEC, {})
     end
@@ -63,6 +100,26 @@ local function set_cfg(repo, selected_release, keep_config, fetch_timeout)
         if t and t >= 5 and t <= 300 then
             uci:set(CFG, SEC, "fetch_timeout", tostring(math.floor(t)))
         end
+    end
+
+    if filter_prefix_enabled ~= nil then
+        uci:set(CFG, SEC, "filter_prefix_enabled", to_bool(filter_prefix_enabled) and "1" or "0")
+    end
+
+    if filter_prefix ~= nil then
+        uci:set(CFG, SEC, "filter_prefix", trim(filter_prefix))
+    end
+
+    if filter_min_size_enabled ~= nil then
+        uci:set(CFG, SEC, "filter_min_size_enabled", to_bool(filter_min_size_enabled) and "1" or "0")
+    end
+
+    if filter_min_size ~= nil then
+        local s = tonumber(filter_min_size)
+        if not s or s < 0 then
+            s = 0
+        end
+        uci:set(CFG, SEC, "filter_min_size", tostring(math.floor(s)))
     end
 
     uci:commit(CFG)
@@ -269,6 +326,7 @@ function index()
 
     entry({"admin", "system", "ghfu"}, call("action_index"), _("GitHub Firmware Upgrade"), 65)
     entry({"admin", "system", "ghfu", "status"}, call("action_status")).leaf = true
+    entry({"admin", "system", "ghfu", "config"}, call("action_config")).leaf = true
     entry({"admin", "system", "ghfu", "download"}, call("action_download")).leaf = true
     entry({"admin", "system", "ghfu", "upgrade"}, call("action_upgrade")).leaf = true
     entry({"admin", "system", "ghfu", "backup"}, call("action_backup")).leaf = true
@@ -349,12 +407,31 @@ function action_status()
     })
 end
 
+function action_config()
+    local filter_prefix_enabled = http.formvalue("filter_prefix_enabled")
+    local filter_prefix = trim(http.formvalue("filter_prefix") or "")
+    local filter_min_size_enabled = http.formvalue("filter_min_size_enabled")
+    local filter_min_size_raw = trim(http.formvalue("filter_min_size") or "")
+    local filter_min_size = tonumber(filter_min_size_raw)
+    if not filter_min_size or filter_min_size < 0 then
+        filter_min_size = 0
+    end
+
+    set_cfg(nil, nil, nil, nil, filter_prefix_enabled, filter_prefix, filter_min_size_enabled, tostring(math.floor(filter_min_size)))
+
+    json_resp({
+        ok = true,
+        config = get_cfg()
+    })
+end
+
 function action_download()
     local repo = normalize_repo(http.formvalue("repo") or "")
     local selected_release = trim(http.formvalue("selected_release") or "")
     local keep_config = to_bool(http.formvalue("keep_config")) and "1" or "0"
     local asset_url = trim(http.formvalue("asset_url") or "")
     local asset_name = trim(http.formvalue("asset_name") or "firmware.bin.gz")
+    local asset_size = tonumber(trim(http.formvalue("asset_size") or "")) or 0
 
     local logs = {}
 
@@ -390,11 +467,87 @@ function action_download()
     end
 
     local fw_path = "/tmp/ghfu_" .. clean_name
-    local dl_cmd = "uclient-fetch -qO " .. util.shellquote(fw_path) .. " " .. util.shellquote(asset_url)
+    local progress_log = "/tmp/ghfu-download-progress.log"
+    local raw_log = "/tmp/ghfu-download-raw.log"
+    fs.unlink(progress_log)
+    fs.unlink(raw_log)
+
+    local shell_script = table.concat({
+        "progress_log=", util.shellquote(progress_log), "\n",
+        "raw_log=", util.shellquote(raw_log), "\n",
+        "target=", util.shellquote(fw_path), "\n",
+        "total=", tostring(math.max(0, math.floor(asset_size))), "\n",
+        "url=", util.shellquote(asset_url), "\n",
+        ": > \"$progress_log\"\n",
+        ": > \"$raw_log\"\n",
+        "uclient-fetch -qO \"$target\" \"$url\" >\"$raw_log\" 2>&1 &\n",
+        "dlpid=$!\n",
+        "prev_size=0\n",
+        "prev_ts=$(date +%s)\n",
+        "last_pct=-1\n",
+        "while kill -0 \"$dlpid\" 2>/dev/null; do\n",
+        "    sleep 1\n",
+        "    size=$(wc -c < \"$target\" 2>/dev/null)\n",
+        "    [ -z \"$size\" ] && size=0\n",
+        "    now=$(date +%s)\n",
+        "    elapsed=$((now - prev_ts))\n",
+        "    [ \"$elapsed\" -le 0 ] && elapsed=1\n",
+        "    delta=$((size - prev_size))\n",
+        "    rate=$((delta / elapsed))\n",
+        "    if [ \"$total\" -gt 0 ]; then\n",
+        "        pct=$((size * 100 / total))\n",
+        "        [ \"$pct\" -gt 100 ] && pct=100\n",
+        "        if [ \"$pct\" -ne \"$last_pct\" ]; then\n",
+        "            echo \"PROGRESS|$pct|$size|$total|$rate\" >> \"$progress_log\"\n",
+        "            last_pct=$pct\n",
+        "        fi\n",
+        "    else\n",
+        "        echo \"PROGRESS|0|$size|0|$rate\" >> \"$progress_log\"\n",
+        "    fi\n",
+        "    prev_size=$size\n",
+        "    prev_ts=$now\n",
+        "done\n",
+        "wait \"$dlpid\"\n",
+        "rc=$?\n",
+        "size=$(wc -c < \"$target\" 2>/dev/null)\n",
+        "[ -z \"$size\" ] && size=0\n",
+        "echo \"FINISH|$size|$total\" >> \"$progress_log\"\n",
+        "if [ \"$rc\" -ne 0 ] && [ -s \"$raw_log\" ]; then\n",
+        "    cat \"$raw_log\" >> \"$progress_log\"\n",
+        "fi\n",
+        "exit \"$rc\"\n",
+    })
 
     logs[#logs + 1] = tr("Downloading firmware: ") .. clean_name
-    local rc = sys.call(dl_cmd .. " >/tmp/ghfu-download.log 2>&1")
+    local rc = sys.call("sh -c " .. util.shellquote(shell_script) .. " >/dev/null 2>&1")
+
+    for _, line in ipairs(read_lines(progress_log)) do
+        local pct, size, total, rate = line:match("^PROGRESS|(%d+)|(%d+)|(%d+)|(%-?%d+)$")
+        if pct then
+            local speed_text = human_bytes(rate) .. "/s"
+            if tonumber(total) and tonumber(total) > 0 then
+                logs[#logs + 1] = tr("Download progress: ") .. pct .. "% (" .. human_bytes(size) .. "/" .. human_bytes(total) .. "), " .. tr("Speed: ") .. speed_text
+            else
+                logs[#logs + 1] = tr("Download progress: ") .. human_bytes(size) .. ", " .. tr("Speed: ") .. speed_text
+            end
+        else
+            local finished_size, finished_total = line:match("^FINISH|(%d+)|(%d+)$")
+            if finished_size then
+                if tonumber(finished_total) and tonumber(finished_total) > 0 then
+                    logs[#logs + 1] = tr("Download finished: ") .. human_bytes(finished_size) .. "/" .. human_bytes(finished_total)
+                else
+                    logs[#logs + 1] = tr("Download finished: ") .. human_bytes(finished_size)
+                end
+            end
+        end
+    end
+
     if rc ~= 0 or not fs.access(fw_path) then
+        for _, line in ipairs(read_lines(raw_log)) do
+            if trim(line) ~= "" then
+                logs[#logs + 1] = line
+            end
+        end
         logs[#logs + 1] = tr("Firmware download failed, please check network or GitHub repository")
         json_resp({ ok = false, logs = logs })
         return

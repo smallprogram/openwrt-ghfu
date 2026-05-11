@@ -128,6 +128,82 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         border-bottom: 0;
     }
 
+    .ghfu-filter-panel {
+        border: 1px solid var(--ghfu-border-assets);
+        border-radius: 10px;
+        background: rgba(148, 163, 184, 0.08);
+        padding: 12px;
+    }
+
+    .ghfu-filter-title {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ghfu-text);
+    }
+
+    .ghfu-filter-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) auto;
+        gap: 10px 12px;
+        align-items: end;
+    }
+
+    .ghfu-filter-item {
+        min-width: 0;
+    }
+
+    .ghfu-filter-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 8px;
+        font-size: 12px;
+        color: var(--ghfu-text);
+    }
+
+    .ghfu-filter-toggle input {
+        margin: 0;
+    }
+
+    .ghfu-filter-item label {
+        display: block;
+        margin: 0 0 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ghfu-text);
+    }
+
+    .ghfu-filter-item input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .ghfu-filter-help {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--ghfu-text-muted);
+    }
+
+    .ghfu-filter-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    @media (max-width: 760px) {
+        .ghfu-filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ghfu-filter-actions {
+            justify-content: stretch;
+        }
+
+        .ghfu-filter-actions .cbi-button {
+            width: 100%;
+        }
+    }
+
     #ghfu_log {
         width: 1000px;
         max-width: 100%;
@@ -254,6 +330,38 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         </div>
 
         <div class="cbi-value">
+            <label class="cbi-value-title" id="ghfu_filter_label"></label>
+            <div class="cbi-value-field">
+                <div class="ghfu-filter-panel">
+                    <div class="ghfu-filter-title" id="ghfu_filter_title"></div>
+                    <div class="ghfu-filter-grid">
+                        <div class="ghfu-filter-item">
+                            <label class="ghfu-filter-toggle" for="ghfu_filter_prefix_enabled">
+                                <input id="ghfu_filter_prefix_enabled" type="checkbox" checked="checked" />
+                                <span id="ghfu_filter_prefix_enabled_label"></span>
+                            </label>
+                            <label for="ghfu_filter_prefix" id="ghfu_filter_prefix_label"></label>
+                            <input id="ghfu_filter_prefix" class="cbi-input-text" type="text" />
+                            <div class="ghfu-filter-help" id="ghfu_filter_prefix_hint"></div>
+                        </div>
+                        <div class="ghfu-filter-item">
+                            <label class="ghfu-filter-toggle" for="ghfu_filter_min_size_enabled">
+                                <input id="ghfu_filter_min_size_enabled" type="checkbox" checked="checked" />
+                                <span id="ghfu_filter_min_size_enabled_label"></span>
+                            </label>
+                            <label for="ghfu_filter_min_size" id="ghfu_filter_min_size_label"></label>
+                            <input id="ghfu_filter_min_size" class="cbi-input-text" type="number" min="0" step="1" style="width:100%;" />
+                            <div class="ghfu-filter-help" id="ghfu_filter_min_size_hint"></div>
+                        </div>
+                        <div class="ghfu-filter-actions">
+                            <button class="cbi-button cbi-button-action" id="ghfu_filter_save" type="button"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cbi-value">
             <label class="cbi-value-title" id="ghfu_assets_label"></label>
             <div class="cbi-value-field">
                 <div id="ghfu_assets"></div>
@@ -292,10 +400,23 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         repoLabel: '<%:GitHub Repository%>',
         searchLabel: '<%:Firmware Fuzzy Search%>',
         searchPlaceholder: '<%:Enter keyword to filter firmware names%>',
+        filterLabel: '<%:Filter Rules%>',
+        filterPanelTitle: '<%:Default Filter Rules%>',
+        filterPrefixEnabledLabel: '<%:Enable Prefix Filter%>',
+        filterPrefixLabel: '<%:Exclude Name Prefix%>',
+        filterPrefixPlaceholder: '<%:e.g. buildinfo%>',
+        filterPrefixHint: '<%:Matched names will be hidden%>',
+        filterMinSizeEnabledLabel: '<%:Enable Size Filter%>',
+        filterMinSizeLabel: '<%:Exclude Size Below (KB)%>',
+        filterMinSizeHint: '<%:Files smaller than this size will be hidden%>',
+        filterSaveBtn: '<%:Save Filter Rules%>',
+        filterSaving: '<%:Saving filter rules...%>',
+        filterSaved: '<%:Filter rules saved%>',
         releaseLabel: '<%:Release/Firmware%>',
         keepLabel: '<%:Keep Configuration During Upgrade%>',
         statusLabel: '<%:System and Release Status%>',
         assetsLabel: '<%:Available Firmware%>',
+        assetsLabelWithCount: '<%:Available Firmware (%d)%>',
         logLabel: '<%:Logs%>',
         refreshBtn: '<%:Fetch Latest Release%>',
         upgradeBtn: '<%:Download and Upgrade System%>',
@@ -332,7 +453,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         notesUnavailable: '<%:Latest release page URL is unavailable, please fetch latest release again%>',
         popupBlocked: '<%:Unable to open a new window. Please allow pop-ups in your browser.%>',
         fallbackUsedHint: '<%:Latest release assets are not ready yet, using previous release with available firmware.%>',
-        partialAssetsHint: '<%:Some firmware files may still be compiling/uploading for the latest release. Please try again later if your platform is missing.%>'
+        partialAssetsHint: '<%:Latest release partial firmware may still be compiling, waiting to upload, or failed to compile. If your platform is missing, please wait for the next build result.%>'
     };
 
     var assets = [];
@@ -340,9 +461,47 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     var latestReleaseName = '';
     var latestReleaseUrl = '';
     var routerTzOffsetMin = null;
+    var rebootPollTimer = null;
+    var rebootPollAttempts = 0;
+    var rebootPollLimit = 36;
+    var filterPrefix = '';
+    var filterMinSizeKb = 0;
+    var filterPrefixEnabled = true;
+    var filterMinSizeEnabled = true;
 
     function byId(id) { return document.getElementById(id); }
     function t(key) { return I18N[key] || key; }
+    function trim(s) { return String(s || '').replace(/^\s+|\s+$/g, ''); }
+
+    function updateAssetsLabel(count) {
+        byId('ghfu_assets_label').textContent = t('assetsLabelWithCount').replace('%d', String(count || 0));
+    }
+
+    function updateFilterInputs(cfg) {
+        filterPrefixEnabled = !cfg || cfg.filter_prefix_enabled !== '0';
+        filterMinSizeEnabled = !cfg || cfg.filter_min_size_enabled !== '0';
+        filterPrefix = (cfg && cfg.filter_prefix) ? String(cfg.filter_prefix) : '';
+        filterMinSizeKb = parseInt(cfg && cfg.filter_min_size, 10);
+        if (isNaN(filterMinSizeKb) || filterMinSizeKb < 0) {
+            filterMinSizeKb = 0;
+        }
+
+        byId('ghfu_filter_prefix_enabled').checked = filterPrefixEnabled;
+        byId('ghfu_filter_prefix').value = filterPrefix;
+        byId('ghfu_filter_prefix').disabled = !filterPrefixEnabled;
+        byId('ghfu_filter_prefix_label').style.opacity = filterPrefixEnabled ? '1' : '0.55';
+        byId('ghfu_filter_prefix_hint').style.opacity = filterPrefixEnabled ? '1' : '0.65';
+
+        byId('ghfu_filter_min_size_enabled').checked = filterMinSizeEnabled;
+        byId('ghfu_filter_min_size').value = String(filterMinSizeKb);
+        byId('ghfu_filter_min_size').disabled = !filterMinSizeEnabled;
+        byId('ghfu_filter_min_size_label').style.opacity = filterMinSizeEnabled ? '1' : '0.55';
+        byId('ghfu_filter_min_size_hint').style.opacity = filterMinSizeEnabled ? '1' : '0.65';
+    }
+
+    function updateFilteredAssetsLabel() {
+        updateAssetsLabel(getVisibleAssets().length);
+    }
 
     /* 检测当前主题是否为暗色，并给 root 元素打标记 */
     function applyTheme() {
@@ -402,11 +561,21 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         byId('ghfu_repo_label').textContent = t('repoLabel');
         byId('ghfu_search_label').textContent = t('searchLabel');
         byId('ghfu_search').placeholder = t('searchPlaceholder');
+        byId('ghfu_filter_label').textContent = t('filterLabel');
+        byId('ghfu_filter_title').textContent = t('filterPanelTitle');
+        byId('ghfu_filter_prefix_enabled_label').textContent = t('filterPrefixEnabledLabel');
+        byId('ghfu_filter_prefix_label').textContent = t('filterPrefixLabel');
+        byId('ghfu_filter_prefix').placeholder = t('filterPrefixPlaceholder');
+        byId('ghfu_filter_prefix_hint').textContent = t('filterPrefixHint');
+        byId('ghfu_filter_min_size_enabled_label').textContent = t('filterMinSizeEnabledLabel');
+        byId('ghfu_filter_min_size_label').textContent = t('filterMinSizeLabel');
+        byId('ghfu_filter_min_size_hint').textContent = t('filterMinSizeHint');
+        byId('ghfu_filter_save').textContent = t('filterSaveBtn');
         byId('ghfu_release_label').textContent = t('releaseLabel');
         byId('ghfu_keep_label').textContent = t('keepLabel');
         byId('ghfu_status_label').textContent = t('statusLabel');
         byId('ghfu_status').textContent = t('waitingStatus');
-        byId('ghfu_assets_label').textContent = t('assetsLabel');
+        updateAssetsLabel(0);
         byId('ghfu_log_label').textContent = t('logLabel');
         byId('ghfu_refresh').textContent = t('refreshBtn');
         byId('ghfu_notes').textContent = t('notesBtn');
@@ -520,14 +689,39 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         return n.toFixed(i === 0 ? 0 : 2) + ' ' + units[i];
     }
 
+    function shouldKeepAsset(asset) {
+        if (!asset || typeof asset !== 'object') {
+            return false;
+        }
+
+        var name = String(asset.name || '');
+        var size = Number(asset.size || 0);
+
+        if (filterPrefixEnabled && filterPrefix && name.toLowerCase().indexOf(filterPrefix.toLowerCase()) === 0) {
+            return false;
+        }
+
+        if (filterMinSizeEnabled && filterMinSizeKb > 0 && size > 0 && size < filterMinSizeKb * 1024) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function getVisibleAssets() {
+        return assets.filter(shouldKeepAsset);
+    }
+
     function renderAssets() {
         var box = byId('ghfu_assets');
         var kw = (byId('ghfu_search').value || '').toLowerCase();
         box.innerHTML = '';
 
-        var filtered = assets.filter(function(a) {
+        var filtered = getVisibleAssets().filter(function(a) {
             return !kw || (a.name || '').toLowerCase().indexOf(kw) !== -1;
         });
+
+        updateAssetsLabel(getVisibleAssets().length);
 
         if (!filtered.length) {
             box.textContent = t('noMatch');
@@ -588,6 +782,68 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         return out;
     }
 
+    function saveFilterRules() {
+        var prefix = trim(byId('ghfu_filter_prefix').value || '');
+        var minSizeRaw = trim(byId('ghfu_filter_min_size').value || '');
+        var minSize = parseInt(minSizeRaw, 10);
+        if (isNaN(minSize) || minSize < 0) {
+            minSize = 0;
+        }
+        var prefixEnabled = byId('ghfu_filter_prefix_enabled').checked ? '1' : '0';
+        var minSizeEnabled = byId('ghfu_filter_min_size_enabled').checked ? '1' : '0';
+
+        byId('ghfu_filter_save').disabled = true;
+        appendLog(t('filterSaving'));
+
+        request('<%=url([[admin]], [[system]], [[ghfu]], [[config]])%>', {
+            filter_prefix_enabled: prefixEnabled,
+            filter_min_size_enabled: minSizeEnabled,
+            filter_prefix: prefix,
+            filter_min_size: String(minSize)
+        }).then(function(resp) {
+            byId('ghfu_filter_save').disabled = false;
+            if (!resp.ok) {
+                appendLog(resp.msg || t('requestFailed'));
+                return;
+            }
+
+            if (resp.config) {
+                updateFilterInputs(resp.config);
+            } else {
+                updateFilterInputs({
+                    filter_prefix_enabled: prefixEnabled,
+                    filter_min_size_enabled: minSizeEnabled,
+                    filter_prefix: prefix,
+                    filter_min_size: minSize
+                });
+            }
+
+            renderAssets();
+            appendLog(t('filterSaved'));
+        }).catch(function(err) {
+            byId('ghfu_filter_save').disabled = false;
+            appendLog(t('requestFailed') + err);
+        });
+    }
+
+    function shouldKeepAsset(asset) {
+        if (!asset || typeof asset !== 'object') {
+            return false;
+        }
+
+        var name = String(asset.name || '');
+        if (/^buildinfo/i.test(name)) {
+            return false;
+        }
+
+        var size = Number(asset.size || 0);
+        if (size > 0 && size < 200 * 1024) {
+            return false;
+        }
+
+        return true;
+    }
+
     function refreshStatus() {
         var repo = (byId('ghfu_repo').value || '').trim();
         var timeoutSec = parseInt(byId('ghfu_timeout').value, 10) || 15;
@@ -616,6 +872,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
                 if (resp.config) {
                     byId('ghfu_release').value = resp.config.selected_release || '';
                     byId('ghfu_keep').checked = (resp.config.keep_config || '1') === '1';
+                    updateFilterInputs(resp.config);
                 }
                 if (typeof resp.fetch_timeout === 'number') {
                     byId('ghfu_timeout').value = String(resp.fetch_timeout);
@@ -712,7 +969,8 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             selected_release: selectedRelease,
             keep_config: keepConfig,
             asset_url: selectedAsset.url,
-            asset_name: selectedAsset.name || selectedRelease
+            asset_name: selectedAsset.name || selectedRelease,
+            asset_size: String(selectedAsset.size || 0)
         }).then(function(resp) {
             var lines = resp.logs || [];
             lines.forEach(appendLog);
@@ -773,24 +1031,55 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     }
 
     function pollForReboot() {
-        setTimeout(function() {
-            fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' })
-                .then(function(r) {
-                    if (r.ok) {
+        if (rebootPollTimer) {
+            clearTimeout(rebootPollTimer);
+        }
+
+        rebootPollAttempts = 0;
+
+        var poll = function() {
+            rebootPollTimer = setTimeout(function() {
+                rebootPollAttempts++;
+
+                fetch(window.location.href, { method: 'GET', cache: 'no-cache', credentials: 'include' })
+                    .then(function() {
+                        clearTimeout(rebootPollTimer);
                         window.location.reload();
-                    } else {
-                        pollForReboot();
-                    }
-                })
-                .catch(function() {
-                    pollForReboot();
-                });
-        }, 5000);
+                    })
+                    .catch(function() {
+                        if (rebootPollAttempts >= rebootPollLimit) {
+                            clearTimeout(rebootPollTimer);
+                            window.location.reload();
+                            return;
+                        }
+                        poll();
+                    });
+            }, 5000);
+        };
+
+        poll();
     }
 
     byId('ghfu_refresh').addEventListener('click', refreshStatus);
     byId('ghfu_upgrade').addEventListener('click', doDownload);
     byId('ghfu_search').addEventListener('input', renderAssets);
+    byId('ghfu_filter_prefix_enabled').addEventListener('change', function() {
+        updateFilterInputs({
+            filter_prefix_enabled: this.checked ? '1' : '0',
+            filter_min_size_enabled: filterMinSizeEnabled ? '1' : '0',
+            filter_prefix: byId('ghfu_filter_prefix').value,
+            filter_min_size: byId('ghfu_filter_min_size').value
+        });
+    });
+    byId('ghfu_filter_min_size_enabled').addEventListener('change', function() {
+        updateFilterInputs({
+            filter_prefix_enabled: filterPrefixEnabled ? '1' : '0',
+            filter_min_size_enabled: this.checked ? '1' : '0',
+            filter_prefix: byId('ghfu_filter_prefix').value,
+            filter_min_size: byId('ghfu_filter_min_size').value
+        });
+    });
+    byId('ghfu_filter_save').addEventListener('click', saveFilterRules);
     byId('ghfu_backup').addEventListener('click', function() {
         window.location.href = '<%=url([[admin]], [[system]], [[ghfu]], [[backup]])%>';
     });
