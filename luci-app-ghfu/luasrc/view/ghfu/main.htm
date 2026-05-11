@@ -82,13 +82,49 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     }
 
     #ghfu-root .ghfu-wide {
-        width: 800px;
+        width: 100%;
         max-width: 100%;
         box-sizing: border-box;
     }
 
+    .ghfu-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr);
+        gap: 14px;
+    }
+
+    .ghfu-card {
+        border: 1px solid var(--ghfu-border);
+        border-radius: 10px;
+        background: var(--ghfu-bg-card);
+        padding: 12px;
+    }
+
+    .ghfu-card-title {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ghfu-text);
+    }
+
+    .ghfu-card .cbi-value {
+        margin: 0 0 10px;
+    }
+
+    .ghfu-card .cbi-value:last-child {
+        margin-bottom: 0;
+    }
+
+    .ghfu-card-status { grid-column: 1; }
+    .ghfu-card-basic { grid-column: 2; }
+    .ghfu-card-filter { grid-column: 1; }
+    .ghfu-card-assets { grid-column: 2; }
+    .ghfu-card-log {
+        grid-column: 1 / -1;
+    }
+
     #ghfu_status {
-        width: 1000px;
+        width: 100%;
         max-width: 100%;
         box-sizing: border-box;
         border: 1px solid var(--ghfu-border-status);
@@ -100,7 +136,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     }
 
     #ghfu_assets {
-        width: 1000px;
+        width: 100%;
         max-width: 100%;
         max-height: 280px;
         overflow: auto;
@@ -205,9 +241,9 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     }
 
     #ghfu_log {
-        width: 1000px;
+        width: 100%;
         max-width: 100%;
-        min-height: 610px;
+        min-height: 260px;
         border-radius: 8px;
         border: 1px solid var(--ghfu-log-border);
         background: var(--ghfu-log-bg);
@@ -226,13 +262,47 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         text-align: right;
     }
 
+    .ghfu-card-actions {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .ghfu-card-actions .cbi-button {
+        margin: 0;
+    }
+
     #ghfu-root .cbi-button {
         border-radius: 10px;
         padding: 8px 14px;
     }
 
+    @media (max-width: 980px) {
+        .ghfu-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .ghfu-card-status,
+        .ghfu-card-basic,
+        .ghfu-card-filter,
+        .ghfu-card-assets,
+        .ghfu-card-log {
+            grid-column: 1;
+        }
+    }
+
     @media (max-width: 760px) {
         #ghfu-root { padding: 12px; }
+
+        .ghfu-card-actions {
+            justify-content: stretch;
+        }
+
+        .ghfu-card-actions .cbi-button {
+            width: 100%;
+        }
     }
 
     #ghfu-upgrade-modal {
@@ -287,50 +357,53 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
 <div class="cbi-map" id="ghfu-root">
     <h2 id="ghfu_title"></h2>
     <p class="ghfu-subtitle" id="ghfu_subtitle"></p>
-    <div class="cbi-section">
-        <div class="cbi-value">
-            <label class="cbi-value-title" id="ghfu_status_label"></label>
-            <div class="cbi-value-field" id="ghfu_status"></div>
-        </div>
+    <div class="cbi-section ghfu-layout">
+        <div class="ghfu-card ghfu-card-status">
+            <div class="ghfu-card-title" id="ghfu_status_label"></div>
+            <div id="ghfu_status"></div>
 
-        <div class="cbi-value">
-            <label class="cbi-value-title" for="ghfu_repo" id="ghfu_repo_label"></label>
-            <div class="cbi-value-field">
-                <input id="ghfu_repo" class="cbi-input-text ghfu-wide" type="text" value="smallprogram/OpenWrtAction" />
+            <div class="ghfu-card-actions">
+                <button class="cbi-button cbi-button-neutral" id="ghfu_backup" type="button"></button>
+                <button class="cbi-button cbi-button-action" id="ghfu_refresh" type="button"></button>
+                <button class="cbi-button cbi-button-neutral" id="ghfu_notes" type="button" disabled="disabled"></button>
             </div>
         </div>
 
-        <div class="cbi-value">
-            <label class="cbi-value-title" for="ghfu_release" id="ghfu_release_label"></label>
-            <div class="cbi-value-field">
-                <input id="ghfu_release" class="cbi-input-text ghfu-wide" type="text" readonly="readonly" />
+        <div class="ghfu-card ghfu-card-basic">
+            <div class="ghfu-card-title" id="ghfu_basic_title"></div>
+
+            <div class="cbi-value">
+                <label class="cbi-value-title" for="ghfu_repo" id="ghfu_repo_label"></label>
+                <div class="cbi-value-field">
+                    <input id="ghfu_repo" class="cbi-input-text ghfu-wide" type="text" value="smallprogram/OpenWrtAction" />
+                </div>
+            </div>
+
+            <div class="cbi-value">
+                <label class="cbi-value-title" for="ghfu_release" id="ghfu_release_label"></label>
+                <div class="cbi-value-field">
+                    <input id="ghfu_release" class="cbi-input-text ghfu-wide" type="text" readonly="readonly" />
+                </div>
+            </div>
+
+            <div class="cbi-value">
+                <label class="cbi-value-title" for="ghfu_timeout" id="ghfu_timeout_label"></label>
+                <div class="cbi-value-field" style="display:flex;align-items:center;gap:10px;">
+                    <input id="ghfu_timeout" class="cbi-input-text" type="number" min="5" max="300" value="15" style="width:80px;" />
+                    <span id="ghfu_timeout_hint" style="color:var(--ghfu-text-muted);font-size:12px;"></span>
+                </div>
+            </div>
+
+            <div class="cbi-value">
+                <label class="cbi-value-title" for="ghfu_keep" id="ghfu_keep_label"></label>
+                <div class="cbi-value-field">
+                    <input id="ghfu_keep" type="checkbox" checked="checked" />
+                </div>
             </div>
         </div>
 
-        <div class="cbi-value">
-            <label class="cbi-value-title" for="ghfu_keep" id="ghfu_keep_label"></label>
-            <div class="cbi-value-field">
-                <input id="ghfu_keep" type="checkbox" checked="checked" />
-            </div>
-        </div>
-
-        <div class="cbi-value">
-            <label class="cbi-value-title" for="ghfu_timeout" id="ghfu_timeout_label"></label>
-            <div class="cbi-value-field" style="display:flex;align-items:center;gap:10px;">
-                <input id="ghfu_timeout" class="cbi-input-text" type="number" min="5" max="300" value="15" style="width:80px;" />
-                <span id="ghfu_timeout_hint" style="color:var(--ghfu-text-muted);font-size:12px;"></span>
-            </div>
-        </div>
-
-        <div class="cbi-value">
-            <label class="cbi-value-title" for="ghfu_search" id="ghfu_search_label"></label>
-            <div class="cbi-value-field">
-                <input id="ghfu_search" class="cbi-input-text ghfu-wide" type="text" />
-            </div>
-        </div>
-
-        <div class="cbi-value">
-            <label class="cbi-value-title" id="ghfu_filter_label"></label>
+        <div class="ghfu-card ghfu-card-filter">
+            <div class="ghfu-card-title" id="ghfu_filter_label"></div>
             <div class="cbi-value-field">
                 <div class="ghfu-filter-panel">
                     <div class="ghfu-filter-title" id="ghfu_filter_title"></div>
@@ -361,25 +434,30 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             </div>
         </div>
 
-        <div class="cbi-value">
-            <label class="cbi-value-title" id="ghfu_assets_label"></label>
+        <div class="ghfu-card ghfu-card-assets">
+            <div class="ghfu-card-title" id="ghfu_assets_label"></div>
+
+            <div class="cbi-value">
+                <label class="cbi-value-title" for="ghfu_search" id="ghfu_search_label"></label>
+                <div class="cbi-value-field">
+                    <input id="ghfu_search" class="cbi-input-text ghfu-wide" type="text" />
+                </div>
+            </div>
+
             <div class="cbi-value-field">
                 <div id="ghfu_assets"></div>
             </div>
-        </div>
 
-        <div class="cbi-value">
-            <label class="cbi-value-title" for="ghfu_log" id="ghfu_log_label"></label>
-            <div class="cbi-value-field">
-                <textarea id="ghfu_log" class="cbi-input-textarea" readonly="readonly"></textarea>
+            <div class="ghfu-card-actions">
+                <button class="cbi-button cbi-button-apply" id="ghfu_upgrade" type="button" disabled="disabled"></button>
             </div>
         </div>
 
-        <div class="cbi-page-actions">
-            <button class="cbi-button cbi-button-neutral" id="ghfu_backup" type="button"></button>
-            <button class="cbi-button cbi-button-action" id="ghfu_refresh" type="button"></button>
-            <button class="cbi-button cbi-button-neutral" id="ghfu_notes" type="button" disabled="disabled"></button>
-            <button class="cbi-button cbi-button-apply" id="ghfu_upgrade" type="button" disabled="disabled"></button>
+        <div class="ghfu-card ghfu-card-log">
+            <div class="ghfu-card-title" id="ghfu_log_label"></div>
+            <div class="cbi-value-field">
+                <textarea id="ghfu_log" class="cbi-input-textarea" readonly="readonly"></textarea>
+            </div>
         </div>
     </div>
 </div>
@@ -397,6 +475,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     var I18N = {
         title: '<%:GitHub Firmware Upgrade%>',
         subtitle: '<%:Firmware upgrade assistant based on GitHub Release.%>',
+        basicTitle: '<%:Basic Configuration%>',
         repoLabel: '<%:GitHub Repository%>',
         searchLabel: '<%:Firmware Fuzzy Search%>',
         searchPlaceholder: '<%:Enter keyword to filter firmware names%>',
@@ -558,6 +637,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     function initTexts() {
         byId('ghfu_title').textContent = t('title');
         byId('ghfu_subtitle').textContent = t('subtitle');
+        byId('ghfu_basic_title').textContent = t('basicTitle');
         byId('ghfu_repo_label').textContent = t('repoLabel');
         byId('ghfu_search_label').textContent = t('searchLabel');
         byId('ghfu_search').placeholder = t('searchPlaceholder');

@@ -7,6 +7,9 @@ msgstr "GitHub 固件升级"
 msgid "Firmware upgrade assistant based on GitHub Release."
 msgstr "基于 GitHub Release 的固件升级助手。"
 
+msgid "Basic Configuration"
+msgstr "基础配置"
+
 msgid "GitHub Repository"
 msgstr "GitHub 仓库"
 

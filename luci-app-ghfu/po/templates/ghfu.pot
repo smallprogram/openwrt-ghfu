@@ -7,6 +7,9 @@ msgstr ""
 msgid "Firmware upgrade assistant based on GitHub Release."
 msgstr ""
 
+msgid "Basic Configuration"
+msgstr ""
+
 msgid "GitHub Repository"
 msgstr ""
 
