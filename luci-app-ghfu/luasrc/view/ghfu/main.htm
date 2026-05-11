@@ -188,6 +188,11 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         border-radius: 10px;
         background: rgba(148, 163, 184, 0.08);
         padding: 12px;
+        width: 100%;
+        min-height: 190px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
     }
 
     .ghfu-filter-title {
@@ -201,12 +206,16 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 10px 12px;
-        align-items: end;
+        align-items: start;
         width: 100%;
+        flex: 1;
+        align-content: start;
     }
 
     .ghfu-filter-item {
         min-width: 0;
+        display: flex;
+        flex-direction: column;
     }
 
     .ghfu-filter-toggle {
@@ -244,8 +253,10 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     .ghfu-filter-actions {
         display: flex;
         justify-content: flex-end;
-        grid-column: 1 / -1;
-        margin-top: 4px;
+        width: 100%;
+        margin-top: auto;
+        padding-top: 8px;
+        box-sizing: border-box;
     }
 
     @media (max-width: 760px) {
@@ -322,6 +333,21 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     .ghfu-card-log .cbi-value-field {
         width: 100%;
         min-width: 0;
+    }
+
+    .ghfu-card-filter > .cbi-value-field,
+    .ghfu-card-assets > .cbi-value-field,
+    .ghfu-card-log > .cbi-value-field {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .ghfu-card-assets #ghfu_assets,
+    .ghfu-card-log #ghfu_log {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
     }
 
     #ghfu-root .cbi-button {
@@ -482,9 +508,9 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
                             <input id="ghfu_filter_min_size" class="cbi-input-text" type="number" min="0" step="1" style="width:100%;" />
                             <div class="ghfu-filter-help" id="ghfu_filter_min_size_hint"></div>
                         </div>
-                        <div class="ghfu-filter-actions">
-                            <button class="cbi-button cbi-button-action" id="ghfu_filter_save" type="button"></button>
-                        </div>
+                    </div>
+                    <div class="ghfu-filter-actions">
+                        <button class="cbi-button cbi-button-action" id="ghfu_filter_save" type="button"></button>
                     </div>
                 </div>
             </div>
@@ -919,6 +945,40 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
         return out;
     }
 
+    function normalizeLogLines(raw) {
+        if (Array.isArray(raw)) {
+            return raw;
+        }
+
+        if (raw === null || raw === undefined) {
+            return [];
+        }
+
+        if (typeof raw === 'string') {
+            return raw ? [raw] : [];
+        }
+
+        if (typeof raw === 'object') {
+            var keys = Object.keys(raw).sort(function(a, b) {
+                var na = parseInt(a, 10), nb = parseInt(b, 10);
+                if (!isNaN(na) && !isNaN(nb)) {
+                    return na - nb;
+                }
+                return String(a).localeCompare(String(b));
+            });
+            var out = [];
+            keys.forEach(function(k) {
+                var v = raw[k];
+                if (v !== null && v !== undefined && String(v) !== '') {
+                    out.push(String(v));
+                }
+            });
+            return out;
+        }
+
+        return [String(raw)];
+    }
+
     function saveFilterRules() {
         var prefix = trim(byId('ghfu_filter_prefix').value || '');
         var minSizeRaw = trim(byId('ghfu_filter_min_size').value || '');
@@ -987,7 +1047,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
                 return;
             }
 
-            var lines = resp.logs || [];
+            var lines = normalizeLogLines(resp.logs);
             lines.forEach(appendLog);
 
             if (resp.done) {
@@ -1139,7 +1199,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             asset_name: selectedAsset.name || selectedRelease,
             asset_size: String(selectedAsset.size || 0)
         }).then(function(resp) {
-            var lines = resp.logs || [];
+            var lines = normalizeLogLines(resp.logs);
             lines.forEach(appendLog);
             if (!resp.ok) {
                 restoreButtonsAfterDownload();
@@ -1182,7 +1242,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             fw_name: fwName,
             keep_config: keepConfig
         }).then(function(resp) {
-            var lines = resp.logs || [];
+            var lines = normalizeLogLines(resp.logs);
             lines.forEach(appendLog);
             if (resp.ok && resp.rebooting) {
                 showUpgradeModal();
