@@ -1,4 +1,6 @@
-# luci-app-ghfu
+# luci-app-ghfu (luci-app-GithubFramewareUpdate)
+
+集成固件地址：https://github.com/smallprogram/OpenWrtAction
 
 ## 中文说明
 
