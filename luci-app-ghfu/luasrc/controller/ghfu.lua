@@ -413,6 +413,17 @@ function action_status()
 end
 
 function action_config()
+    local repo = normalize_repo(http.formvalue("repo") or "")
+    local keep_config = http.formvalue("keep_config")
+    local fetch_timeout_raw = trim(http.formvalue("fetch_timeout") or "")
+    local fetch_timeout = nil
+    if fetch_timeout_raw ~= "" then
+        local t = tonumber(fetch_timeout_raw)
+        if t and t >= 5 and t <= 300 then
+            fetch_timeout = tostring(math.floor(t))
+        end
+    end
+
     local filter_prefix_enabled = http.formvalue("filter_prefix_enabled")
     local filter_prefix = trim(http.formvalue("filter_prefix") or "")
     local filter_min_size_enabled = http.formvalue("filter_min_size_enabled")
@@ -422,7 +433,26 @@ function action_config()
         filter_min_size = 0
     end
 
-    set_cfg(nil, nil, nil, nil, filter_prefix_enabled, filter_prefix, filter_min_size_enabled, tostring(math.floor(filter_min_size)))
+    local has_basic = (http.formvalue("repo") ~= nil) or (keep_config ~= nil) or (http.formvalue("fetch_timeout") ~= nil)
+    if has_basic and repo == "" then
+        json_resp({
+            ok = false,
+            msg = tr("GitHub repository cannot be empty"),
+            config = get_cfg()
+        })
+        return
+    end
+
+    set_cfg(
+        has_basic and repo or nil,
+        nil,
+        keep_config,
+        fetch_timeout,
+        filter_prefix_enabled,
+        filter_prefix,
+        filter_min_size_enabled,
+        tostring(math.floor(filter_min_size))
+    )
 
     json_resp({
         ok = true,

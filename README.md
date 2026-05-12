@@ -2,7 +2,9 @@
 
 集成固件地址：https://github.com/smallprogram/OpenWrtAction
 
-<img width="1682" height="877" alt="image" src="https://github.com/user-attachments/assets/f13fb148-7ccc-4149-ba2f-4bc8d7dde1ad" />
+![alt text](img/cn.png)
+
+![alt text](img/update.png)
 
 ### install apk
 ```
@@ -41,9 +43,20 @@ make package/feeds/ghfu/luci-app-ghfu/compile -j$(nproc)
 
 - 可配置 GitHub 仓库地址。
 - 可配置获取 Release 的超时时间（默认 15 秒）。
+- 支持单独保存基础配置（GitHub 仓库、获取超时、保留配置升级）。
 - 升级前日志可视化（下载进度、倒计时、升级启动提示）。
 - 升级过程中提供等待对话框，并在设备恢复后自动刷新页面。
+- 获取到最新 Release 后，会尝试根据上次升级固件名自动筛选并自动选中可升级固件。
+- 升级业务进行中会锁定关键按钮（保存基础配置、保存过滤规则、获取最新 Release、下载备份、下载并升级系统），异常退出后自动恢复。
 - 中英文界面文案支持。
+
+### 自动筛选规则（Release/固件）
+
+- 未获取到 Release 信息：不进行自动筛选。
+- 获取到 Release 信息后：
+	- 若 Release/固件 输入框中为 `Release名称 / 固件文件名`，会提取最后的固件文件名用于模糊筛选。
+	- 若筛选结果唯一：自动选中该固件，并记录日志：已自动筛选为上次更新的固件名xxx，如果需要更改请删除模糊检索内容。
+	- 若筛选结果为 0 条或多条：记录日志：最新release中没有固件名称xxx，请手动筛选或等待下次仓库编译。并清空模糊检索框，交由用户手动筛选。
 
 ### 适用场景
 
