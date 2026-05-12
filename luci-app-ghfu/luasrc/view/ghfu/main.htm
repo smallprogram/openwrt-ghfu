@@ -773,6 +773,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     var filterPrefixEnabled = true;
     var filterMinSizeEnabled = true;
     var upgradeWorkflowBusy = false;
+    var appVersion = '<%=app_version or ""%>';
 
     function byId(id) { return document.getElementById(id); }
     function t(key) { return I18N[key] || key; }
@@ -780,6 +781,10 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
 
     function updateAssetsLabel(count) {
         byId('ghfu_assets_label').textContent = t('assetsLabelWithCount').replace('%d', String(count || 0));
+    }
+
+    function updateTitle() {
+        byId('ghfu_title').textContent = appVersion ? (t('title') + ' v' + appVersion) : t('title');
     }
 
     function updateFilterInputs(cfg) {
@@ -982,7 +987,7 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
     }
 
     function initTexts() {
-        byId('ghfu_title').textContent = t('title');
+        updateTitle();
         byId('ghfu_subtitle').textContent = t('subtitle');
         byId('ghfu_basic_title').textContent = t('basicTitle');
         byId('ghfu_repo_label').textContent = t('repoLabel');
@@ -1412,6 +1417,8 @@ Repository: https://github.com/smallprogram/luci-app-ghfu
             { repo: repo, fetch_timeout: String(timeoutSec) },
             (timeoutSec + 5) * 1000
         ).then(function(resp) {
+            appVersion = String(resp && resp.app_version || '');
+            updateTitle();
                 byId('ghfu_refresh').disabled = false;
                 if (!resp.ok) {
                     byId('ghfu_notes').disabled = true;
