@@ -4,9 +4,22 @@
 
 <img width="1682" height="877" alt="image" src="https://github.com/user-attachments/assets/f13fb148-7ccc-4149-ba2f-4bc8d7dde1ad" />
 
+### install apk
 ```
-apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-app-ghfu.apk
-apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-i18n-ghfu-zh-cn.apk
+# install apk
+apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-app-ghfu-xxxx.apk
+apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-i18n-ghfu-zh-cn-xxxx.apk
+```
+### feeds compile
+```
+# add to feeds
+src-git ghfu https://github.com/smallprogram/luci-app-ghfu.git;main
+
+# update and install feeds
+./scripts/feeds update ghfu && ./scripts/feeds install -a -p ghfu
+
+# compile ghfu
+make package/feeds/ghfu/luci-app-ghfu/compile -j$(nproc)
 ```
 
 ## 中文说明
