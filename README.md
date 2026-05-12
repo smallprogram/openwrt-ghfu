@@ -4,6 +4,10 @@
 
 <img width="1682" height="877" alt="image" src="https://github.com/user-attachments/assets/f13fb148-7ccc-4149-ba2f-4bc8d7dde1ad" />
 
+```
+apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-app-ghfu.apk
+apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-i18n-ghfu-zh-cn.apk
+```
 
 ## 中文说明
 
