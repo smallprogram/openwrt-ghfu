@@ -28,7 +28,7 @@
 ---
 
 ## 🛠️ Quick Start | 快速开始
-
+<!--
 ### 📦 安装 APK (Install APK)
 通过命令行直接在设备上安装：
 ```bash
@@ -36,6 +36,7 @@
 apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-app-ghfu-xxxx.apk
 apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-i18n-ghfu-zh-cn-xxxx.apk
 ```
+-->
 ### ⚙️ 源码编译 (Feeds Compile)
 将插件加入你的 OpenWrt 编译环境中：
 ```
