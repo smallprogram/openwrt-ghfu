@@ -28,7 +28,7 @@ msgstr "Keep Configuration"
 msgid "System and Release Status"
 msgstr "System and Release Status"
 
-msgid "Available Firmware (%d)"
+msgid "Available Firmware (Filtered: %d)"
 msgstr "Available Firmware (Filtered: %d)"
 
 msgid "Filter Valid Extensions"
@@ -168,9 +168,6 @@ msgstr " downloaded successfully"
 
 msgid "Invalid firmware file name"
 msgstr "Invalid firmware file name"
-
-msgid "Default Filter Rules"
-msgstr "Default Filter Rules"
 msgid "Firmware file not found, please download again"
 msgstr "Firmware file not found, please download again"
 

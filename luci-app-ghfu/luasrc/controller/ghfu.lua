@@ -67,7 +67,48 @@ end
 
 local DEFAULT_VALID_EXTS = ".img .img.gz .bin .tar .itb .trx .chk .dlf .ari"
 
+local function migrate_legacy_filter_cfg()
+    if not uci:get(CFG, SEC) then
+        return
+    end
+
+    local changed = false
+
+    if uci:get(CFG, SEC, "filter_ext_enabled") == nil then
+        uci:set(CFG, SEC, "filter_ext_enabled", "1")
+        changed = true
+    end
+
+    local valid_extensions = uci:get(CFG, SEC, "valid_extensions")
+    if not valid_extensions or trim(valid_extensions) == "" then
+        uci:set(CFG, SEC, "valid_extensions", DEFAULT_VALID_EXTS)
+        changed = true
+    end
+
+    if uci:get(CFG, SEC, "filter_prefix_enabled") ~= nil then
+        uci:delete(CFG, SEC, "filter_prefix_enabled")
+        changed = true
+    end
+    if uci:get(CFG, SEC, "filter_prefix") ~= nil then
+        uci:delete(CFG, SEC, "filter_prefix")
+        changed = true
+    end
+    if uci:get(CFG, SEC, "filter_min_size_enabled") ~= nil then
+        uci:delete(CFG, SEC, "filter_min_size_enabled")
+        changed = true
+    end
+    if uci:get(CFG, SEC, "filter_min_size") ~= nil then
+        uci:delete(CFG, SEC, "filter_min_size")
+        changed = true
+    end
+
+    if changed then
+        uci:commit(CFG)
+    end
+end
+
 local function get_cfg()
+    migrate_legacy_filter_cfg()
     return {
         github_repo = uci:get(CFG, SEC, "github_repo") or "smallprogram/OpenWrtAction",
         selected_release = uci:get(CFG, SEC, "selected_release") or "",

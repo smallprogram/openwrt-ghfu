@@ -28,7 +28,7 @@ msgstr ""
 msgid "System and Release Status"
 msgstr ""
 
-msgid "Available Firmware (%d)"
+msgid "Available Firmware (Filtered: %d)"
 msgstr ""
 
 msgid "Filter Valid Extensions"

@@ -31,7 +31,7 @@ msgstr "系统与 Release 状态"
 msgid "Available Firmware"
 msgstr "可选固件"
 
-msgid "Available Firmware (%d)"
+msgid "Available Firmware (Filtered: %d)"
 msgstr "可选固件(过滤后: %d个)"
 
 msgid "Last Updated Firmware"
