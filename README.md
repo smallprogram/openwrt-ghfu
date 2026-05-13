@@ -40,7 +40,7 @@ apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-i18n-ghfu-zh-c
 将插件加入你的 OpenWrt 编译环境中：
 ```
 # 1. Add to feeds
-src-git ghfu [https://github.com/smallprogram/luci-app-ghfu.git;main](https://github.com/smallprogram/luci-app-ghfu.git;main)
+src-git ghfu https://github.com/smallprogram/luci-app-ghfu.git;main
 
 # 2. Update and install feeds
 ./scripts/feeds update ghfu && ./scripts/feeds install -a -p ghfu
