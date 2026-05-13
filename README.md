@@ -22,7 +22,7 @@
 
 <div align="center">
   <img src="img/cn.png" alt="CN UI" width="48%">
-  <img src="img/update.png" alt="Update Status" width="48%">
+  <img src="img/cn_update.png" alt="Update Status" width="48%">
 </div>
 
 ---
@@ -59,13 +59,15 @@ make package/feeds/ghfu/luci-app-ghfu/compile -j$(nproc)
 - **🌐 极简升级闭环**：在 LuCI 页面中一键获取指定 GitHub 仓库的最新 Release 信息，下载固件并自动调用 `sysupgrade` 执行系统升级。
 - **📊 智能对比与展示**：自动对比当前系统刷写时间与 Release 发布时间，给出清晰的升级建议。状态卡片支持初始化/成功/失败三态展示，并显示 `Assets总数`。
 - **⚙️ 灵活的基础配置**：支持自定义 GitHub 仓库地址、获取超时时间（默认 15 秒），并支持单独保存基础配置。升级时支持“保留配置”与“不保留配置”模式。
+- **🔧 基于扩展名的固件过滤**：智能过滤系统通过扩展名验证固件文件（支持 `.img`、`.img.gz`、`.bin`、`.tar`、`.itb`、`.trx`、`.chk`、`.dlf`、`.ari` 等）。包含用户友好的配置对话框，可自定义有效扩展名列表，配置自动保存到系统。
 - **🤖 智能记忆与自动筛选**：
-  - 获取到最新 Release 后，会尝试根据**上次升级固件名**自动模糊筛选并选中可升级固件。
+  - 获取到最新 Release 后，会尝试根据**上次升级固件名**自动筛选并选中可升级固件。
+  - 优先尝试精确名称匹配，若无匹配结果则回退到模糊搜索。
   - 若筛选结果唯一，自动选中并记录日志。
   - 若结果不唯一或找不到匹配项，清空检索框交由用户手动筛选并给出日志提示。
 - **🔎 空格友好模糊检索**：支持自动清洗首尾空格、合并连续空格，并支持空格分词的多关键词同时匹配（AND 语义）。
 - **🛡️ 安全与防误触机制**：升级业务进行中会**锁定关键按钮**（保存配置、获取最新 Release、下载升级等），异常退出后自动恢复。
-- **🖥️ 极佳的交互体验**：提供升级前日志可视化（下载进度、倒计时、启动提示），升级过程中弹窗等待，并在设备恢复后自动刷新页面。支持下载系统备份（与 OpenWrt 原生备份能力一致）。升级命令由后端后台执行，页面跳转后已启动任务不会中断。中英文界面完美适配。
+- **🖥️ 极佳的交互体验**：全新 10 列响应式网格布局，提供增强的视觉反馈效果。支持升级前日志可视化（下载进度、倒计时、启动提示），升级过程中弹窗等待，并在设备恢复后自动刷新页面。卡片设计包含细致的阴影效果和平滑的悬停交互。支持下载系统备份（与 OpenWrt 原生备份能力一致）。升级命令由后端后台执行，页面跳转后已启动任务不会中断。中英文界面完美适配。
 
 ### 🎯 适用场景
 
@@ -80,17 +82,24 @@ make package/feeds/ghfu/luci-app-ghfu/compile -j$(nproc)
 > `luci-app-ghfu` is a sleek LuCI firmware upgrade application designed for OpenWrt / ImmortalWrt.
 > It allows users to check, download, and upgrade firmware directly from GitHub Releases via the router's web UI, entirely eliminating the need for manual URL handling or shell commands.
 
+<div align="center">
+  <img src="img/en.png" alt="CN UI" width="48%">
+  <img src="img/en_update.png" alt="Update Status" width="48%">
+</div>
+
 ### ✨ Key Features
 
 - **🌐 Seamless Integration**: Fetches the latest release data from a specified GitHub repository and triggers `sysupgrade` automatically upon download.
 - **📊 Smart Comparison**: Compares the current system flash time with the release publish time to provide a clear upgrade suggestion. The status card supports init/success/failure states and shows `Assets total`.
 - **⚙️ Highly Configurable**: Customizable GitHub repository input and release fetch timeout (default: 15s). Supports both **keep-config** and **no-keep-config** upgrade modes.
+- **🔧 Extension-Based Firmware Filtering**: Smart filtering system that validates firmware files by their extensions (`.img`, `.img.gz`, `.bin`, `.tar`, `.itb`, `.trx`, `.chk`, `.dlf`, `.ari`). Includes a user-friendly configuration dialog to customize the list of valid extensions, with configuration persisted to the system.
 - **🤖 Auto-Filtering & Memory**: 
   - Automatically attempts to filter and select the correct firmware based on the filename of the *last upgraded firmware*.
+  - First tries exact name matching, then falls back to fuzzy search for flexibility.
   - If a unique match is found, it selects it automatically. If not, it prompts the user to select manually via detailed logs.
 - **🔎 Whitespace-Friendly Fuzzy Search**: Trims leading/trailing spaces, collapses repeated spaces, and supports multi-keyword AND matching split by spaces.
 - **🛡️ Failsafe UI**: Locks critical operation buttons (save configs, fetch release, download/upgrade) while an upgrade process is running to prevent accidental clicks. Auto-recovers on abnormal exits.
-- **🖥️ Enhanced UX**: Provides visual logs for download progress, countdowns, and upgrade trigger steps. Features a waiting dialog during the upgrade and auto-refreshes the page when the device comes back online. Upgrade commands are executed in backend background jobs, so already-started tasks continue after page navigation. Fully bilingual (Chinese and English). 
+- **🖥️ Enhanced UX**: Redesigned responsive 10-column grid layout with improved visual feedback. Provides visual logs for download progress, countdowns, and upgrade trigger steps. Features enhanced shadows and smooth hover effects for better interactivity. Includes a waiting dialog during the upgrade and auto-refreshes the page when the device comes back online. Upgrade commands are executed in backend background jobs, so already-started tasks continue after page navigation. Fully bilingual (Chinese and English). 
 
 ### 🎯 Typical Use Cases
 
