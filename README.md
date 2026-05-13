@@ -57,14 +57,15 @@ make package/feeds/ghfu/luci-app-ghfu/compile -j$(nproc)
 ### ✨ 核心功能与特性
 
 - **🌐 极简升级闭环**：在 LuCI 页面中一键获取指定 GitHub 仓库的最新 Release 信息，下载固件并自动调用 `sysupgrade` 执行系统升级。
-- **📊 智能对比与展示**：自动对比当前系统刷写时间与 Release 发布时间，给出清晰的升级建议。展示固件资产列表并支持关键字筛选。
+- **📊 智能对比与展示**：自动对比当前系统刷写时间与 Release 发布时间，给出清晰的升级建议。状态卡片支持初始化/成功/失败三态展示，并显示 `Assets总数`。
 - **⚙️ 灵活的基础配置**：支持自定义 GitHub 仓库地址、获取超时时间（默认 15 秒），并支持单独保存基础配置。升级时支持“保留配置”与“不保留配置”模式。
 - **🤖 智能记忆与自动筛选**：
   - 获取到最新 Release 后，会尝试根据**上次升级固件名**自动模糊筛选并选中可升级固件。
   - 若筛选结果唯一，自动选中并记录日志。
   - 若结果不唯一或找不到匹配项，清空检索框交由用户手动筛选并给出日志提示。
+- **🔎 空格友好模糊检索**：支持自动清洗首尾空格、合并连续空格，并支持空格分词的多关键词同时匹配（AND 语义）。
 - **🛡️ 安全与防误触机制**：升级业务进行中会**锁定关键按钮**（保存配置、获取最新 Release、下载升级等），异常退出后自动恢复。
-- **🖥️ 极佳的交互体验**：提供升级前日志可视化（下载进度、倒计时、启动提示），升级过程中弹窗等待，并在设备恢复后自动刷新页面。支持下载系统备份（与 OpenWrt 原生备份能力一致）。中英文界面完美适配。
+- **🖥️ 极佳的交互体验**：提供升级前日志可视化（下载进度、倒计时、启动提示），升级过程中弹窗等待，并在设备恢复后自动刷新页面。支持下载系统备份（与 OpenWrt 原生备份能力一致）。升级命令由后端后台执行，页面跳转后已启动任务不会中断。中英文界面完美适配。
 
 ### 🎯 适用场景
 
@@ -82,13 +83,14 @@ make package/feeds/ghfu/luci-app-ghfu/compile -j$(nproc)
 ### ✨ Key Features
 
 - **🌐 Seamless Integration**: Fetches the latest release data from a specified GitHub repository and triggers `sysupgrade` automatically upon download.
-- **📊 Smart Comparison**: Compares the current system flash time with the release publish time to provide a clear upgrade suggestion. Displays release assets with keyword-based filtering.
+- **📊 Smart Comparison**: Compares the current system flash time with the release publish time to provide a clear upgrade suggestion. The status card supports init/success/failure states and shows `Assets total`.
 - **⚙️ Highly Configurable**: Customizable GitHub repository input and release fetch timeout (default: 15s). Supports both **keep-config** and **no-keep-config** upgrade modes.
 - **🤖 Auto-Filtering & Memory**: 
   - Automatically attempts to filter and select the correct firmware based on the filename of the *last upgraded firmware*.
   - If a unique match is found, it selects it automatically. If not, it prompts the user to select manually via detailed logs.
+- **🔎 Whitespace-Friendly Fuzzy Search**: Trims leading/trailing spaces, collapses repeated spaces, and supports multi-keyword AND matching split by spaces.
 - **🛡️ Failsafe UI**: Locks critical operation buttons (save configs, fetch release, download/upgrade) while an upgrade process is running to prevent accidental clicks. Auto-recovers on abnormal exits.
-- **🖥️ Enhanced UX**: Provides visual logs for download progress, countdowns, and upgrade trigger steps. Features a waiting dialog during the upgrade and auto-refreshes the page when the device comes back online. Fully bilingual (Chinese and English). 
+- **🖥️ Enhanced UX**: Provides visual logs for download progress, countdowns, and upgrade trigger steps. Features a waiting dialog during the upgrade and auto-refreshes the page when the device comes back online. Upgrade commands are executed in backend background jobs, so already-started tasks continue after page navigation. Fully bilingual (Chinese and English). 
 
 ### 🎯 Typical Use Cases
 
