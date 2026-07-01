@@ -6,7 +6,7 @@
 *基于 GitHub Release 的 OpenWrt / ImmortalWrt 一键固件升级插件*<br>
 *One-Click OpenWrt Firmware Upgrade via GitHub Releases*
 
-[![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fsmallprogram%2Fluci-app-ghfu&countColor=%2337d67a&style=flat-square)](https://github.com/smallprogram/luci-app-ghfu)
+[![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fsmallprogram%2Fopenwrt-ghfu&countColor=%2337d67a&style=flat-square)](https://github.com/smallprogram/openwrt-ghfu)
 [![License](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=flat-square)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-Compatible-informational?style=flat-square&logo=openwrt)](https://openwrt.org/)
 
@@ -42,7 +42,7 @@ apk add --allow-untrusted --repositories-file /dev/null /tmp/luci-i18n-ghfu-zh-c
 将插件加入你的 OpenWrt 编译环境中：
 ```
 # 1. Add to feeds
-src-git ghfu https://github.com/smallprogram/luci-app-ghfu.git;main
+src-git ghfu https://github.com/smallprogram/openwrt-ghfu.git;main
 
 # 2. Update and install feeds
 ./scripts/feeds update ghfu && ./scripts/feeds install -a -p ghfu
